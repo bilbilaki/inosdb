@@ -1,5 +1,5 @@
 // tv_series_details.dart
-import 'package:flutter/foundation.dart'; // For kDebugMode
+// For kDebugMode
 
 class TvSeriesDetails {
   final int id;

@@ -1,210 +1,118 @@
 // tmdb_api_service.dart
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart'; // For kDebugMode
-import 'package:myapp/models/tvseries_details.dart';
-// Import the model
+import 'package:myapp/models/tvseries_details.dart'; // Import the model
 
 class TmdbApiService {
-  // --- IMPORTANT: REPLACE WITH YOUR ACTUAL TMDB API KEY ---
-  final String _apiKey = '607e40af5bb66576f6fd7252d5529e24';
-  // -------------------------------------------------------
-
+  final String _apiKey =
+      "607e40af5bb66576f6fd7252d5529e24"; // Replace with your actual API ke
   final String _baseUrl = 'https://api.themoviedb.org/3';
 
-  Future<TvSeriesDetails?> findAndFetchTvSeriesDetails(
-      String seriesName) async {
-    if (_apiKey == 'YOUR_TMDB_API_KEY_HERE') {
-      if (kDebugMode) {
-        print(
-            "ERROR: Please replace 'YOUR_TMDB_API_KEY_HERE' with your actual TMDB API key in tmdb_api_service.dart");
-      }
-      throw Exception(
-          "TMDB API Key not set. Please replace 'YOUR_TMDB_API_KEY_HERE' in tmdb_api_service.dart");
-    }
+  // Cache for storing results
+  final _cache = <String, Map<String, dynamic>>{};
+  static const _cacheTimeout = Duration(hours: 720);
 
-    if (seriesName.trim().isEmpty) {
-      if (kDebugMode) {
-        print("ERROR: Series name cannot be empty.");
-      }
-      return null; // Or throw an exception
-    }
-    final String formatted =
-        seriesName.replaceAll(RegExp(r' _\:;+'), '-').toLowerCase();
+  // Rate limiting
+  DateTime? _lastRequestTime;
+  static const _minRequestInterval = Duration(milliseconds: 250);
 
-    try {
-      // 1. Search for the TV series by name
-      final searchUri = Uri.parse(
-          '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(formatted)}');
+  // Retry configuration
+  static const _maxRetries = 5;
+  static const _retryDelay = Duration(seconds: 1);
 
-      if (kDebugMode) {
-        print("Searching TMDB: $searchUri");
-      }
-
-      final searchResponse = await http.get(searchUri);
-
-      if (searchResponse.statusCode == 200) {
-        final searchData = json.decode(searchResponse.body);
-        final results =
-            searchData['results'] as List<dynamic>?; // Make it nullable
-
-        if (results != null && results.isNotEmpty) {
-          // 2. Get the ID of the first result (most relevant usually)
-          final firstResult = results[0];
-          final seriesId = firstResult['id'] as int?;
-
-          if (seriesId != null) {
-            if (kDebugMode) {
-              print(
-                  "Found series ID: $seriesId for '$seriesName'. Fetching details...");
-            }
-            // 3. Fetch detailed information using the ID
-            return await getTvSeriesDetails(seriesId);
-          } else {
-            if (kDebugMode) {
-              print(
-                  "No valid ID found in the first search result for '$seriesName'.");
-            }
-            return null;
-          }
-        } else {
-          if (kDebugMode) {
-            print("No results found for series: '$seriesName'");
-          }
-          return null; // No results found
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-              "Error searching TMDB: ${searchResponse.statusCode} - ${searchResponse.body}");
-        }
-        // Handle search error (e.g., invalid API key, network issue)
-        throw Exception(
-            'Failed to search TV series (Status code: ${searchResponse.statusCode})');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error during TMDB API call: $e');
-      }
-      // Handle other errors (network, parsing)
-      // You might want to return null or re-throw a custom exception
-      return null;
-      // throw Exception('An error occurred: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>?> findAndFetchRawTvSeriesDetailsJson(
-      String seriesName) async {
-    // ... (API key check, etc.) ...
-    try {
-      final searchUri = Uri.parse(
-          '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(seriesName)}');
-      final searchResponse = await http.get(searchUri);
-
-      if (searchResponse.statusCode == 200) {
-        final searchData =
-            json.decode(searchResponse.body) as Map<String, dynamic>;
-        final results = searchData['results'] as List<dynamic>?;
-        if (results != null && results.isNotEmpty) {
-          final seriesId = (results[0] as Map<String, dynamic>)['id'] as int?;
-          if (seriesId != null) {
-            final detailsUri = Uri.parse(
-                '$_baseUrl/tv/$seriesId?api_key=$_apiKey&language=en-US');
-            final detailsResponse = await http.get(detailsUri);
-            if (detailsResponse.statusCode == 200) {
-              return json.decode(detailsResponse.body) as Map<String, dynamic>;
-            }
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      // ... (error handling) ...
-      return null;
-    }
-  }
+  TmdbApiService();
 
   Future<Map<String, dynamic>?> findAndFetchRawTvSeriesDetailsJsonpostscreen(
-      String _nameController) async {
-    // ... (API key check, etc.) ...
-    try {
-      final searchUri = Uri.parse(
-          '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(_nameController)}');
-      final searchResponse = await http.get(searchUri);
+      String nameController,
+      {int page = 1}) async {
+    if (_apiKey.isEmpty) {
+      throw Exception('API key not configured');
+    }
 
-      if (searchResponse.statusCode == 200) {
-        final searchData =
-            json.decode(searchResponse.body) as Map<String, dynamic>;
-        final results = searchData['results'] as List<dynamic>?;
-        if (results != null && results.isNotEmpty) {
-          final seriesId = (results[0] as Map<String, dynamic>)['id'] as int?;
-          if (seriesId != null) {
-            final detailsUri = Uri.parse(
-                '$_baseUrl/tv/$seriesId?api_key=$_apiKey&language=en-US');
-            final detailsResponse = await http.get(detailsUri);
-            if (detailsResponse.statusCode == 200) {
-              return json.decode(detailsResponse.body) as Map<String, dynamic>;
+    // Check cache first
+    final cacheKey = '${nameController}_$page';
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
+    // Rate limiting
+    if (_lastRequestTime != null) {
+      final timeSinceLastRequest = DateTime.now().difference(_lastRequestTime!);
+      if (timeSinceLastRequest < _minRequestInterval) {
+        await Future.delayed(_minRequestInterval - timeSinceLastRequest);
+      }
+    }
+
+    for (var attempt = 1; attempt <= _maxRetries; attempt++) {
+      try {
+        final searchUri = Uri.parse(
+            '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(nameController)}&page=$page&include_adult=false');
+
+        final searchResponse = await http.get(searchUri, headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        });
+
+        _lastRequestTime = DateTime.now();
+
+        if (searchResponse.statusCode == 200) {
+          final searchData =
+              json.decode(searchResponse.body) as Map<String, dynamic>;
+          final results = searchData['results'] as List<dynamic>?;
+
+          if (results != null && results.isNotEmpty) {
+            final seriesId = (results[0] as Map<String, dynamic>)['id'] as int?;
+
+            if (seriesId != null) {
+              final detailsUri = Uri.parse(
+                  '$_baseUrl/tv/$seriesId?api_key=$_apiKey&language=en-US&append_to_response=credits,external_ids,backdrop_path,poster_path,overview');
+
+              final detailsResponse = await http.get(detailsUri);
+
+              if (detailsResponse.statusCode == 200) {
+                final detailsData =
+                    json.decode(detailsResponse.body) as Map<String, dynamic>;
+
+                // Cache the result
+                _cache[cacheKey] = detailsData;
+
+                // Schedule cache cleanup
+                Future.delayed(_cacheTimeout)
+                    .then((_) => _cache.remove(cacheKey));
+
+                return detailsData;
+              }
             }
           }
+          return null;
+        } else if (searchResponse.statusCode == 429) {
+          // Too Many Requests
+          if (attempt < _maxRetries) {
+            await Future.delayed(_retryDelay * attempt);
+            continue;
+          }
         }
+
+        _logError('API Error',
+            'Status: ${searchResponse.statusCode}, Body: ${searchResponse.body}');
+        return null;
+      } catch (e) {
+        _logError('Network Error', e.toString());
+        if (attempt < _maxRetries) {
+          await Future.delayed(_retryDelay * attempt);
+          continue;
+        }
+        return e as Map<String, dynamic>?;
       }
-      return null;
-    } catch (e) {
-      // ... (error handling) ...
-      return null;
     }
+    return log(e) as Map<String, dynamic>?;
   }
 
-  // --- Optional: Direct fetch by ID if you already have it ---
-  Future<TvSeriesDetails?> getTvSeriesDetails(seriesId) async {
-    if (_apiKey == 'YOUR_TMDB_API_KEY_HERE') {
-      if (kDebugMode) {
-        print(
-            "ERROR: Please replace 'YOUR_TMDB_API_KEY_HERE' with your actual TMDB API key in tmdb_api_service.dart");
-      }
-      throw Exception(
-          "TMDB API Key not set. Please replace 'YOUR_TMDB_API_KEY_HERE' in tmdb_api_service.dart");
-    }
-
-    final detailsUri = Uri.parse(
-        '$_baseUrl/tv/$seriesId?api_key=$_apiKey&language=en-US'); // Optional: Add language
+  void _logError(String type, String message) {
     if (kDebugMode) {
-      print("Fetching details from TMDB: $detailsUri");
+      print('$type: $message');
     }
-
-    try {
-      final detailsResponse = await http.get(detailsUri);
-
-      if (detailsResponse.statusCode == 200) {
-        final detailsData = json.decode(detailsResponse.body);
-        // Use the factory constructor from the model
-        final details = TvSeriesDetails.fromJson(
-            detailsData); // Pass the ID to the model constructor
-        if (kDebugMode) {
-          print("Successfully fetched and parsed details for ID $seriesId.");
-        }
-        return details; // Cast to the correct type
-      } else if (detailsResponse.statusCode == 404) {
-        if (kDebugMode) {
-          print("TV series with ID $seriesId not found.");
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-              "Error fetching details from TMDB: ${detailsResponse.statusCode} - ${detailsResponse.body}");
-        }
-        // Handle details fetch error
-        throw Exception(
-            'Failed to load TV series details (Status code: ${detailsResponse.statusCode})');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching/parsing details for ID $seriesId: $e');
-      }
-      // Handle errors
-      return null;
-      // throw Exception('An error occurred fetching details: $e');
-    }
-    return null;
   }
 }

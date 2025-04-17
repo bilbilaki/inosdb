@@ -1,11 +1,35 @@
 // lib/screens/shorts_screen.dart
 import 'package:flutter/material.dart';
+import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/utils/dynamic_background.dart';
-
-class ShortsScreen extends StatelessWidget {
+import 'package:myapp/utils/random_anime_utils.dart';
+import 'package:provider/provider.dart';
+import 'package:myapp/providers/anime_provider.dart';
+class ShortsScreen extends StatefulWidget {
   const ShortsScreen({super.key});
 
+  @override
+  State<ShortsScreen> createState() => _ShortsScreenState();
+}
+
+class _ShortsScreenState extends State<ShortsScreen> {
+List<TvSeries> _randomAnimeList = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRandomAnime();
+  }
+
+Future<void> _loadRandomAnime() async {
+    setState(() => _isLoading = true);
+    final provider = Provider.of<AnimeProvider>(context, listen: false);
+    // Load 10 random anime series
+    _randomAnimeList = RandomAnimeUtils.getMultipleRandomAnime(provider, 10);
+    setState(() => _isLoading = false);
+  }
   @override
   Widget build(BuildContext context) {
     // Placeholder for Shorts UI - typically a PageView for vertical swiping
@@ -26,7 +50,7 @@ class ShortsScreen extends StatelessWidget {
                      child: Column(
                        crossAxisAlignment: CrossAxisAlignment.start,
                        children: [
-                         Text('Short Title $index', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                         Text('Recommended Anime $index', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                          const SizedBox(height: 8),
                          Row(
                            children: [

@@ -1,10 +1,13 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:myapp/services/tmdb_api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/app_shell.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
 import 'package:myapp/providers/anime_provider.dart';
+import 'package:myapp/screens/anime_grid_screen.dart';
+import 'package:myapp/services/cache_service.dart';
 // Import MovieProvider
 import 'package:myapp/utils/colors.dart';
 import 'package:media_kit/media_kit.dart'; // Import media_kit
@@ -13,6 +16,8 @@ void main() {
   // --- Initialize MediaKit ---
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  TmdbApiService();
+
   // --- End MediaKit Init ---
 
   runApp(
@@ -21,10 +26,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(
             create: (context) => MovieProvider()), // Add MovieProvider
-        ChangeNotifierProvider(
-            create: (_) => TvSeriesProvider()),
-        ChangeNotifierProvider(
-            create: (_) => AnimeProvider()),
+        ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
+        ChangeNotifierProvider(create: (context) => AnimeProvider()),
         ChangeNotifierProvider(create: (context) => DrawerState()),
       ],
       child: const MyApp(),

@@ -50,11 +50,11 @@ class BottomNavBar extends StatelessWidget {
  //         activeIcon: Icon(Icons.add_circle, size: 34.0),
  //         label: 'Add', // No label typically for the center button
  //       ),
- //       BottomNavigationBarItem(
- //         icon: Icon(Icons.download_outlined),
- //         activeIcon: Icon(Icons.download),
- //         label: 'Downloads',
- //       ),
+     //   BottomNavigationBarItem(
+          // icon: Icon(Icons.tiktok_outlined),
+          // activeIcon: Icon(Icons.tiktok),
+          // label: 'Shorts',
+        //),
         BottomNavigationBarItem(
           icon: Icon(Icons.subscriptions_outlined),
           activeIcon: Icon(Icons.subscriptions),

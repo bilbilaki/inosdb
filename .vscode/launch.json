@@ -1,0 +1,28 @@
+{
+    "configurations": [
+      {
+        "type": "dart",
+        "request": "launch",
+        "name": "Launch Flutter App",
+        "program": "${workspaceFolder}/${input:entryPoint}",
+        "cwd": "${workspaceFolder}",
+        "deviceId": "Windows",
+        "console": "debugConsole",
+        "enableAsserts": true,
+        "flutterMode": "debug",
+        "args": [],
+        "showMemoryUsage": true
+      }
+    ],
+    "inputs": [
+      {
+        "type": "pickString",
+        "id": "entryPoint",
+        "description": "Select the entry point for your Flutter app",
+        "options": [
+          "lib/main.dart",
+          "lib/app_shell.dart"
+        ]
+      }
+    ]
+  }

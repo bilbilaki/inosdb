@@ -82,6 +82,8 @@ flutter:
     - assets/1.jpg
     - assets/tvshow_db.csv
     - assets/movies_db.csv
+    - assets/tvshow_db2.csv
+    - assets/tvshow_db1.csv
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

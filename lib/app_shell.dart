@@ -1,18 +1,16 @@
 // lib/app_shell.dart
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/shorts_screen.dart';
 import 'package:myapp/screens/tv_series_grid_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:myapp/screens/create_post_screen.dart';
 import 'package:myapp/screens/home_screen.dart';
 import 'package:myapp/screens/library_screen.dart';
-import 'package:myapp/screens/shorts_screen.dart';
 import 'package:myapp/screens/subscriptions_screen.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/bottom_nav_bar.dart';
 import 'package:myapp/widgets/custom_side_drawer.dart';
 import 'package:myapp/widgets/top_app_bar.dart';
 import 'package:myapp/screens/anime_grid_screen.dart';
-import 'package:myapp/screens/yt-dlp_screen.dart';
 // Use MovieCard
 // Use TvSeriesCard
 // Use StatusBar
@@ -129,30 +127,47 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Index for the _screens list
 
+  // Define the index of the special action button in your BottomNavBar
+  static const int addButtonIndex = 4; // Assuming 'Add' is the 5th item (index 4)
+
+  // Screens managed by the IndexedStack and BottomNavBar switching
+  // NOTE: Exclude ShortsScreen here if it's pushed modally by the Add button
   final List<Widget> _screens = const [
-    HomeScreen(),
-    TvSeriesGridScreen(),
-    AnimeGridScreen(),
-  //  ShortsScreen(),
-  //  SizedBox.shrink(), // Placeholder for Add button action
-//YtdlpConfigScreen(),
-    SubscriptionsScreen(),
-    LibraryScreen(),
+    HomeScreen(),           // Corresponds to BottomNavBar index 0 -> _selectedIndex 0
+    TvSeriesGridScreen(),   // Corresponds to BottomNavBar index 1 -> _selectedIndex 1
+    AnimeGridScreen(),      // Corresponds to BottomNavBar index 2 -> _selectedIndex 2
+    SubscriptionsScreen(),  // Corresponds to BottomNavBar index 3 -> _selectedIndex 3
+    LibraryScreen(),        // Corresponds to BottomNavBar index 5 -> _selectedIndex 4
+    // Removed ShortsScreen from this list
   ];
 
-  void _onItemTapped(int index) {
-  //  if (index == 3) {
+  void _onItemTapped(int index) { // index is the tapped index in BottomNavBar
+    if (index == addButtonIndex) {
       // Handle the "Add" button action (e.g., show modal or navigate)
-    //  Navigator.push(
-      //    context, MaterialPageRoute(builder: (_) => const CreatePostScreen()));
-    // } else {
-      setState(() {
-        // Adjust index for screen list if middle button is tapped
-        _selectedIndex = index > 2 ? index - 1 : index;
-      });
-    //}
+      // This doesn't change the main selected tab (_selectedIndex)
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const ShortsScreen()));
+    } else {
+      // Calculate the corresponding index for the _screens list
+      int newScreenIndex;
+      if (index < addButtonIndex) {
+        // Indices before the add button map directly
+        newScreenIndex = index;
+      } else {
+        // Indices after the add button need to be shifted down by 1
+        // because the _screens list doesn't have an entry for the add button.
+        newScreenIndex = index - 1;
+      }
+
+      // Only update state if the index actually changes
+      if (newScreenIndex != _selectedIndex) {
+          setState(() {
+            _selectedIndex = newScreenIndex;
+          });
+      }
+    }
   }
 
   @override
@@ -160,6 +175,17 @@ class _AppShellState extends State<AppShell> {
     // Use Consumer to react to DrawerState changes
     return Consumer<DrawerState>(
       builder: (context, drawerState, child) {
+        // Calculate the index to highlight in the BottomNavBar
+        int bottomNavHighlightIndex;
+        if (_selectedIndex < addButtonIndex) {
+           // If current screen index is before the add button gap, it's a direct match
+           bottomNavHighlightIndex = _selectedIndex;
+        } else {
+           // If current screen index is after the add button gap,
+           // add 1 to get the corresponding BottomNavBar index.
+           bottomNavHighlightIndex = _selectedIndex + 1;
+        }
+
         return GestureDetector(
           // *** Add Gesture Detection for Custom Drawer ***
           onHorizontalDragStart: drawerState.handleDragStart,
@@ -173,46 +199,48 @@ class _AppShellState extends State<AppShell> {
                 appBar: TopAppBar(
                   // Pass the toggle function to the AppBar button
                   onMenuPressed: drawerState.toggleDrawer,
+                  selectedIndex: _selectedIndex, // You might want to pass the screen index
                 ),
                 body: IndexedStack(
                   // Keep state of inactive screens
-                  index: _selectedIndex,
-                  children: _screens
-                      .where((s) => s is! SizedBox)
-                      .toList(), // Exclude placeholder
+                  index: _selectedIndex, // Use the calculated screen index
+                  children: _screens,   // Use the adjusted _screens list
                 ),
                 bottomNavigationBar: BottomNavBar(
-                  currentIndex: _selectedIndex > 1
-                      ? _selectedIndex + 1
-                      : _selectedIndex, // Map screen index back to nav bar index
+                  currentIndex: bottomNavHighlightIndex, // Use the calculated highlight index
                   onTap: _onItemTapped,
                 ),
               ),
 
-              /*    // --- Dark Overlay when Drawer is Open ---
-              if (drawerState.isDrawerOpen || drawerState.slidePercentage > 0)
-                GestureDetector(
-                  onTap: drawerState.closeDrawer, // Tap outside drawer to close
-                  child: Container(
-                    color: Colors.black
-                        .withOpacity(0.5 * drawerState.slidePercentage),
-                  ),
-                ),
-*/
+              // --- Dark Overlay (Optional but recommended) ---
+              if (drawerState.isDragging || drawerState.isDrawerOpen)
+                 GestureDetector(
+                    onTap: drawerState.closeDrawer, // Tap outside drawer to close
+                    // Absorb pointer prevents taps passing through the overlay
+                    // while still allowing the drawer's gestures.
+                    behavior: HitTestBehavior.translucent,
+                     child: Opacity(
+                        opacity: (drawerState.slidePercentage * 0.5).clamp(0.0, 0.5), // Control fade
+                        child: Container(
+                        color: Colors.black,
+                         ),
+                     ),
+                 ),
+
+
               // --- Animated Drawer ---
+               // Use AnimatedPositioned or Transform.translate based on drag state for smoother interaction
               AnimatedPositioned(
-                duration: drawerState._dragStartPosition >= 0
-                    ? Duration.zero // No animation during drag
-                    : const Duration(
-                        milliseconds: 250), // Animate when snapping open/closed
-                curve: Curves.easeInOut,
-                left: drawerState.isDrawerOpen
-                    ? 0
-                    : -DrawerState._drawerWidth, // Use isDrawerOpen state
-                top: 0,
-                bottom: 0,
-                child: const CustomSideDrawer(),
-              ),
+                 duration: drawerState.isDragging
+                     ? Duration.zero // No animation during drag
+                     : const Duration(milliseconds: 250), // Animate when snapping open/closed
+                 curve: Curves.easeInOut,
+                 left: drawerState.currentOffsetBasedOnDrag, // Use offset based on drag/state
+                 top: 0,
+                 bottom: 0,
+                 width: DrawerState._drawerWidth, // Ensure width is set
+                 child: const CustomSideDrawer(),
+               ),
             ],
           ),
         );

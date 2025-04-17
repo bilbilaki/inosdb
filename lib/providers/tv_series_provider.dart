@@ -8,265 +8,218 @@ import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/services/tmdb_api_service.dart';
 import 'package:myapp/services/cache_service.dart';
 
-// Reusing LoadingStatus enum if defined elsewhere, otherwise define here
 enum LoadingStatus { idle, loading, loaded, error }
 
 class TvSeriesProvider extends ChangeNotifier {
- // Internal state
- Map<String, TvSeries> _seriesMap = {}; // Map<OriginalCsvName, TvSeriesObject>
- final Map<String, List<Episode>> _episodesBySeriesCsvName = {}; // Temporary storage for CSV data
- LoadingStatus _status = LoadingStatus.idle;
- String? _errorMessage;
- String _searchQuery = '';
+  // Internal state
+  Map<String, TvSeries> _seriesMap = {};
+  final Map<String, List<Episode>> _episodesBySeriesCsvName = {};
+  LoadingStatus _status = LoadingStatus.idle;
+  String? _errorMessage;
+  String _searchQuery = '';
 
- // External dependencies
- final TmdbApiService _apiService = TmdbApiService(); // Your TMDB service
- late final CacheService _cacheService;
- bool _isInitialized = false;
+  // Pagination and lazy loading
+  static const int _batchSize = 40;
+  int _currentBatch = 0;
+  bool _hasMoreData = true;
+  List<String> _allSeriesNames = [];
 
- // Public getters
- List<TvSeries> get allSeries => _seriesMap.values.toList()
- ..sort((a, b) => a.name.compareTo(b.name)); // Keep sorted
+  // External dependencies
+  final TmdbApiService _apiService = TmdbApiService();
+  late final CacheService _cacheService;
+  bool _isInitialized = false;
 
- List<TvSeries> get searchResults {
- if (_searchQuery.isEmpty) {
- return allSeries;
- } else {
- return _seriesMap.values.where((series) {
- final queryLower = _searchQuery.toLowerCase();
- return series.name.toLowerCase().contains(queryLower) ||
- series.overview.toLowerCase().contains(queryLower) ||
- series.genres.any((g) => g.name.toLowerCase().contains(queryLower)) ||
- series.firstAirDate?.contains(queryLower) == true; // Search by year maybe
- }).toList()
- ..sort((a, b) => a.name.compareTo(b.name));
- }
- }
+  // Public getters
+  List<TvSeries> get allSeries =>
+      _seriesMap.values.toList()..sort((a, b) => a.name.compareTo(b.name));
 
- LoadingStatus get status => _status;
- String? get errorMessage => _errorMessage;
- bool get isLoading => _status == LoadingStatus.loading;
- bool get hasError => _status == LoadingStatus.error;
- String get searchQuery => _searchQuery;
+  List<TvSeries> get searchResults {
+    if (_searchQuery.isEmpty) {
+      return allSeries;
+    } else {
+      return _seriesMap.values.where((series) {
+        final queryLower = _searchQuery.toLowerCase();
+        return series.name.toLowerCase().contains(queryLower) ||
+            series.overview.toLowerCase().contains(queryLower) ||
+            series.genres
+                .any((g) => g.name.toLowerCase().contains(queryLower)) ||
+            series.firstAirDate?.contains(queryLower) == true;
+      }).toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+    }
+  }
 
+  LoadingStatus get status => _status;
+  String? get errorMessage => _errorMessage;
+  bool get isLoading => _status == LoadingStatus.loading;
+  bool get hasError => _status == LoadingStatus.error;
+  String get searchQuery => _searchQuery;
+  bool get hasMoreData => _hasMoreData;
 
- TvSeriesProvider() {
- _initializeProvider();
- }
+  TvSeriesProvider() {
+    _initializeProvider();
+  }
 
+  Future<void> _initializeProvider() async {
+    if (_isInitialized) return;
+    _cacheService = await CacheService.create();
+    _isInitialized = true;
+    await _loadInitialData();
+  }
 
- Future<void> _initializeProvider() async {
- if (_isInitialized) return;
- _cacheService = await CacheService.create();
- _isInitialized = true;
- loadAndProcessTvSeries();
- }
+  Future<void> _loadInitialData() async {
+    try {
+      // Load CSV data first
+      final rawCsvData = await rootBundle.loadString('assets/tvshow_db.csv');
+      List<List<dynamic>> csvTable =
+          const CsvToListConverter().convert(rawCsvData);
 
+      // Clear previous data
+      _episodesBySeriesCsvName.clear();
+      _allSeriesNames.clear();
 
- Future<void> loadAndProcessTvSeries() async {
- if (_status == LoadingStatus.loading || !_isInitialized) return;
+      // Process CSV data
+      for (final row in csvTable.skip(1)) {
+        if (row.length >= 5) {
+          final String seriesNameCsv = row[0]?.toString().trim() ?? '';
+          if (seriesNameCsv.isNotEmpty) {
+            if (!_episodesBySeriesCsvName.containsKey(seriesNameCsv)) {
+              _episodesBySeriesCsvName[seriesNameCsv] = [];
+              _allSeriesNames.add(seriesNameCsv);
+            }
+            try {
+              final episode = Episode.fromCsvInfo(seriesNameCsv, row);
+              if (episode != null) {
+                // Only add valid episodes
+                _episodesBySeriesCsvName[seriesNameCsv]!.add(episode);
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print(
+                    "Error parsing episode from row for series '$seriesNameCsv': $row -> $e");
+              }
+            }
+          }
+        }
+      }
 
- _updateStatus(LoadingStatus.loading);
- _episodesBySeriesCsvName.clear(); // Clear previous CSV data
- _seriesMap.clear(); // Clear previous Series data
+      // Remove duplicates from series names
+      _allSeriesNames = _allSeriesNames.toSet().toList();
 
- try {
- // --- Step 1: Read and Parse CSV ---
- final rawCsvData = await rootBundle.loadString('assets/tvshow_db.csv');
- List<List<dynamic>> csvTable = const CsvToListConverter().convert(rawCsvData);
+      // Load first batch of TMDB data
+      await loadNextBatch();
+    } catch (e) {
+      _updateStatus(LoadingStatus.error, "Failed to load initial data: $e");
+    }
+  }
 
- final dataRows = csvTable.skip(1); // Skip header row
+  Future<void> loadNextBatch() async {
+    if (_status == LoadingStatus.loading || !_isInitialized || !_hasMoreData)
+      return;
 
- for (final row in dataRows) {
- if (row.length >= 5) { // Ensure basic columns exist
- final String seriesNameCsv = row[0]?.toString().trim() ?? '';
- if (seriesNameCsv.isNotEmpty) {
- if (!_episodesBySeriesCsvName.containsKey(seriesNameCsv)) {
- _episodesBySeriesCsvName[seriesNameCsv] = [];
- }
- try {
- final episode = Episode.fromCsvInfo(seriesNameCsv, row);
- _episodesBySeriesCsvName[seriesNameCsv]!.add(episode);
- } catch (e) {
- if (kDebugMode) {
- print("Error parsing episode from row for series '$seriesNameCsv': $row -> $e");
- }
- // Optionally skip this row or handle error
- }
- }
- } else {
- if (kDebugMode) {
- print("Skipping invalid CSV row: $row");
- }
- }
- }
+    _updateStatus(LoadingStatus.loading);
 
- if (kDebugMode) {
- print("Parsed ${_episodesBySeriesCsvName.length} unique series names from CSV.");
- _episodesBySeriesCsvName.forEach((key, value) {
- // print(" -> $key: ${value.length} episodes");
- });
- }
+    try {
+      final startIndex = _currentBatch * _batchSize;
+      final endIndex =
+          (startIndex + _batchSize).clamp(0, _allSeriesNames.length);
 
- // --- Step 2: Check cache and fetch new data ---
- final cachedSeriesNames = _cacheService.getCachedSeriesNames();
- List<Future<void>> fetchFutures = [];
+      if (startIndex >= _allSeriesNames.length) {
+        _hasMoreData = false;
+        _updateStatus(LoadingStatus.loaded);
+        return;
+      }
 
- for (String seriesNameCsv in _episodesBySeriesCsvName.keys) {
- if (!cachedSeriesNames.contains(seriesNameCsv)) {
- // Only fetch from TMDB if not in cache
- fetchFutures.add(_fetchAndStoreTmdbDetails(seriesNameCsv));
- } else {
- // Use cached data
- final cachedData = _cacheService.getCachedTmdbData(seriesNameCsv);
- if (cachedData != null) {
- final baseTvSeries = TvSeries.fromTmdbJson(cachedData);
- _seriesMap[seriesNameCsv] = baseTvSeries;
- }
- }
- }
+      final batchSeriesNames = _allSeriesNames.sublist(startIndex, endIndex);
+      List<Future<void>> fetchFutures = [];
 
- // Wait for all new TMDB fetches to complete
- await Future.wait(fetchFutures);
+      for (String seriesNameCsv in batchSeriesNames) {
+        if (!_seriesMap.containsKey(seriesNameCsv)) {
+          final cachedData = _cacheService.getCachedTmdbData(seriesNameCsv);
+          if (cachedData != null) {
+            _processSeriesData(seriesNameCsv, cachedData);
+          } else {
+            fetchFutures.add(_fetchAndStoreTmdbDetails(seriesNameCsv));
+          }
+        }
+      }
 
- // --- Step 3: Combine TMDB data with CSV episode data ---
- _buildFinalSeriesList();
+      await Future.wait(fetchFutures);
+      _currentBatch++;
+      _updateStatus(LoadingStatus.loaded);
+    } catch (e) {
+      _updateStatus(LoadingStatus.error, "Failed to load batch: $e");
+    }
+  }
 
- // --- Finalize ---
- _updateStatus(LoadingStatus.loaded);
- if (kDebugMode) {
- print("Successfully loaded and processed ${_seriesMap.length} TV series.");
- }
+  void _processSeriesData(String seriesNameCsv, Map<String, dynamic> tmdbData) {
+    final baseTvSeries = TvSeries.fromTmdbJson(tmdbData);
 
- } catch (e, stacktrace) {
- _updateStatus(LoadingStatus.error, "Failed to load/process data: $e");
- if (kDebugMode) {
- print("TvSeriesProvider Error: $e");
- print(stacktrace);
- }
- _seriesMap.clear(); // Clear data on error
- _episodesBySeriesCsvName.clear();
- }
- }
+    // Get episodes from CSV
+    final csvEpisodes = _episodesBySeriesCsvName[seriesNameCsv] ?? [];
 
- // Helper to fetch TMDB details for one series
- Future<void> _fetchAndStoreTmdbDetails(String seriesNameCsv) async {
- try {
- final tmdbSeriesJson = await _apiService.findAndFetchRawTvSeriesDetailsJson(seriesNameCsv);
+    // Sort episodes by season and episode number
+    csvEpisodes.sort((a, b) {
+      if (a.seasonNumber != b.seasonNumber) {
+        return a.seasonNumber.compareTo(b.seasonNumber);
+      }
+      return a.episodeNumber.compareTo(b.episodeNumber);
+    });
 
- if (tmdbSeriesJson != null) {
- // Cache the TMDB data
- await _cacheService.cacheTmdbData(seriesNameCsv, tmdbSeriesJson);
- 
- // Create TvSeries object
- final baseTvSeries = TvSeries.fromTmdbJson(tmdbSeriesJson);
- _seriesMap[seriesNameCsv] = baseTvSeries;
- 
- if (kDebugMode) {
- print("Fetched and cached TMDB details for '$seriesNameCsv' (ID: ${baseTvSeries.tmdbId})");
- }
- }
- } catch (e) {
- if (kDebugMode) {
- print("Error fetching TMDB details for '$seriesNameCsv': $e");
- }
- // Handle fetch error - maybe log it, series might not appear
- }
- }
+    // Group episodes by season
+    Map<int, List<Episode>> episodesBySeason = {};
+    for (var episode in csvEpisodes) {
+      if (!episodesBySeason.containsKey(episode.seasonNumber)) {
+        episodesBySeason[episode.seasonNumber] = [];
+      }
+      episodesBySeason[episode.seasonNumber]!.add(episode);
+    }
 
+    // Create Season objects and sort them
+    List<Season> seasons = episodesBySeason.entries
+        .map((entry) => Season(
+              seasonNumber: entry.key,
+              episodes: entry.value,
+            ))
+        .toList()
+      ..sort((a, b) => a.seasonNumber.compareTo(b.seasonNumber));
 
- // Helper to organize episodes into seasons and attach to TvSeries
- void _buildFinalSeriesList() {
- Map<String, TvSeries> finalMap = {};
+    // Create final TvSeries with combined data
+    final finalSeries = baseTvSeries.copyWith(seasons: seasons);
+    _seriesMap[seriesNameCsv] = finalSeries;
+  }
 
- _episodesBySeriesCsvName.forEach((seriesNameCsv, csvEpisodes) {
- // Find the corresponding TMDB fetched series detail
- TvSeries? baseSeries = _seriesMap[seriesNameCsv];
+  Future<void> _fetchAndStoreTmdbDetails(String seriesNameCsv) async {
+    try {
+      final tmdbSeriesJson =
+          await _apiService.findAndFetchRawTvSeriesDetailsJsonpostscreen(seriesNameCsv);
+      if (tmdbSeriesJson != null) {
+        await _cacheService.cacheTmdbData(seriesNameCsv, tmdbSeriesJson);
+        _processSeriesData(seriesNameCsv, tmdbSeriesJson);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching TMDB details for '$seriesNameCsv': $e");
+      }
+    }
+  }
 
- if (baseSeries != null) {
- // Group episodes by season number
- Map<int, List<Episode>> episodesBySeason = {};
- for (var episode in csvEpisodes) {
- if (!episodesBySeason.containsKey(episode.seasonNumber)) {
- episodesBySeason[episode.seasonNumber] = [];
- }
- episodesBySeason[episode.seasonNumber]!.add(episode);
- }
+  void searchTvSeries(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
- // Create Season objects
- List<Season> seasons = episodesBySeason.entries.map((entry) {
- return Season(
- seasonNumber: entry.key,
- episodes: entry.value, // Episodes are already sorted within Season constructor
- );
- }).toList();
+  TvSeries? getTvSeriesByTmdbId(int tmdbId) {
+    try {
+      return _seriesMap.values.firstWhere((series) => series.tmdbId == tmdbId);
+    } catch (e) {
+      return null;
+    }
+  }
 
- // Create the final TvSeries object with combined data
- final finalSeries = baseSeries.copyWith(seasons: seasons);
- finalMap[seriesNameCsv] = finalSeries; // Store final combined object
-
- } else {
- if (kDebugMode) {
- print("Skipping series '$seriesNameCsv' in final build due to missing TMDB data.");
- }
- // Optionally, create a basic series object from CSV data only if needed
- }
- });
-
- _seriesMap = finalMap; // Replace the initial map with the final combined one
- // Now _seriesMap contains TvSeries objects with TMDB info and structured Season/Episode lists with URLs
- }
-
-
- void searchTvSeries(String query) {
- _searchQuery = query;
- notifyListeners(); // The getter 'searchResults' handles the filtering
- }
-
- // Function to get a TvSeries by its TMDB ID
- TvSeries? getTvSeriesByTmdbId(int tmdbId) {
- try {
- return _seriesMap.values.firstWhere((series) => series.tmdbId == tmdbId);
- } catch (e) {
- return null; // Not found
- }
- }
-
- // Helper to update status and notify listeners
- void _updateStatus(LoadingStatus newStatus, [String? message]) {
- _status = newStatus;
- _errorMessage = message;
- notifyListeners();
- }
+  void _updateStatus(LoadingStatus newStatus, [String? message]) {
+    _status = newStatus;
+    _errorMessage = message;
+    notifyListeners();
+  }
 }
-
-// Modify TmdbApiService to add a raw JSON method if needed:
-// Add this method inside TmdbApiService class
-/*
- Future<Map<String, dynamic>?> findAndFetchRawTvSeriesDetailsJson(String seriesName) async {
- // ... (API key check, etc.) ...
- try {
- final searchUri = Uri.parse('$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(seriesName)}');
- final searchResponse = await http.get(searchUri);
-
- if (searchResponse.statusCode == 200) {
- final searchData = json.decode(searchResponse.body) as Map<String, dynamic>;
- final results = searchData['results'] as List<dynamic>?;
- if (results != null && results.isNotEmpty) {
- final seriesId = (results[0] as Map<String, dynamic>)['id'] as int?;
- if (seriesId != null) {
- final detailsUri = Uri.parse('$_baseUrl/tv/$seriesId?api_key=$_apiKey&language=en-US');
- final detailsResponse = await http.get(detailsUri);
- if (detailsResponse.statusCode == 200) {
- return json.decode(detailsResponse.body) as Map<String, dynamic>;
- }
- }
- }
- }
- return null;
- } catch (e) {
- // ... (error handling) ...
- return null;
- }
- }
-*/

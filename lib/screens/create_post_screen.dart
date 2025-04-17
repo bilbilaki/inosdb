@@ -10,7 +10,6 @@ import 'package:myapp/services/tmdb_api_service.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/utils/dynamic_background.dart';
 import 'package:csv/csv.dart';
-import 'package:provider/provider.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});

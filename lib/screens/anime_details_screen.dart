@@ -7,10 +7,10 @@ import 'package:myapp/providers/anime_provider.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/episode_tile.dart'; // Import EpisodeTile
 
-class TvSeriesDetailsScreen extends StatelessWidget {
+class AnimeDetailsScreen extends StatelessWidget {
   final int tvSeriesId; // Use TMDB ID to fetch
 
-  const TvSeriesDetailsScreen({required this.tvSeriesId, super.key});
+  const AnimeDetailsScreen({required this.tvSeriesId, super.key});
 
   @override
   Widget build(BuildContext context) {

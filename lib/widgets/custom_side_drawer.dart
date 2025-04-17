@@ -1,5 +1,10 @@
 // lib/widgets/custom_side_drawer.dart
 import 'package:flutter/material.dart';
+import 'package:myapp/screens/anime_grid_screen.dart';
+import 'package:myapp/screens/home_screen.dart';
+import 'package:myapp/screens/library_screen.dart';
+import 'package:myapp/screens/subscriptions_screen.dart';
+import 'package:myapp/screens/tv_series_grid_screen.dart';
 import 'package:myapp/utils/colors.dart';
 
 class CustomSideDrawer extends StatelessWidget {
@@ -42,15 +47,31 @@ class CustomSideDrawer extends StatelessWidget {
                  ),
               ),
             ),
-            _buildDrawerItem(Icons.home_outlined, 'Home', () {}),
-            _buildDrawerItem(Icons.explore_outlined, 'Explore', () {}),
-            _buildDrawerItem(Icons.movie_outlined, 'Shorts', () {}),
-            _buildDrawerItem(Icons.subscriptions_outlined, 'Subscriptions', () {}),
+            _buildDrawerItem(Icons.home_outlined, 'Home',() {
+            //  Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+            }),
+            _buildDrawerItem(Icons.explore_outlined, 'Explore',() {
+           //   Navigator.push(context, MaterialPageRoute(builder: (context) => const TvSeriesGridScreen()));
+            }),
+            _buildDrawerItem(Icons.movie_outlined, 'Shorts',() {
+           //   Navigator.push(context, MaterialPageRoute(builder: (context) => const AnimeGridScreen()));
+            }),
+            _buildDrawerItem(Icons.subscriptions_outlined, 'Subscriptions',() {
+            //  Navigator.push(context, MaterialPageRoute(builder: (context) => const SubscriptionsScreen()));
+            }),
             const Divider(color: AppColors.dividerColor, height: 1),
-             _buildDrawerItem(Icons.video_library_outlined, 'Library', () {}),
-             _buildDrawerItem(Icons.history_outlined, 'History', () {}),
-             _buildDrawerItem(Icons.slideshow_outlined, 'Your videos', () {}),
-             _buildDrawerItem(Icons.download_outlined, 'Downloads', () {}),
+             _buildDrawerItem(Icons.video_library_outlined, 'Library', () {
+          //        Navigator.push(context, MaterialPageRoute(builder: (context) => const LibraryScreen()));
+             }),
+             _buildDrawerItem(Icons.history_outlined, 'History', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('History is not implemented yet')));
+             }),
+             _buildDrawerItem(Icons.slideshow_outlined, 'Your videos', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your videos is not implemented yet')));
+             }),
+             _buildDrawerItem(Icons.download_outlined, 'Downloads', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Downloads is not implemented yet')));
+             }),
              _buildDrawerItem(Icons.thumb_up_outlined, 'Liked videos', () {}),
             const Divider(color: AppColors.dividerColor, height: 1),
              const Padding(
@@ -58,9 +79,15 @@ class CustomSideDrawer extends StatelessWidget {
                child: Text('Subscriptions', style: TextStyle(color: AppColors.primaryText, fontWeight: FontWeight.bold)),
              ),
             // TODO: Add list of subscribed channels here
-             _buildDrawerItem(Icons.person_pin, 'Channel 1', () {}),
-             _buildDrawerItem(Icons.person_pin, 'Channel 2', () {}),
-             _buildDrawerItem(Icons.add, 'Browse channels', () {}),
+             _buildDrawerItem(Icons.person_pin, 'Channel 1', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Channel 1 is not implemented yet')));
+             }),
+             _buildDrawerItem(Icons.person_pin, 'Channel 2', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Channel 2 is not implemented yet')));
+             }),
+             _buildDrawerItem(Icons.add, 'Browse channels', () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Browse channels is not implemented yet')));
+             }),
 
 
              // Add more sections and items as needed (Settings, Help, etc.)

@@ -1,7 +1,7 @@
 // lib/widgets/chip_bar.dart
 import 'package:flutter/material.dart';
 import 'package:myapp/utils/colors.dart';
-import 'package:myapp/utils/dummy_data.dart';
+//import 'package:myapp/utils/dummy_data.dart';
 
 class ChipBar extends StatefulWidget {
   const ChipBar({super.key});
@@ -56,4 +56,9 @@ class _ChipBarState extends State<ChipBar> {
       ),
     );
   }
+}
+
+List<String> getChipLabels() {
+  return ['All', 'Anime', 'TV Series', 'Movies'];
+  
 }

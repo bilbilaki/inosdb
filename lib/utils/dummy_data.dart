@@ -34,25 +34,23 @@ List<String> _dummyChannels = [
 ];
 
 List<String> _dummyThumbnails = [
-  'https://i.ytimg.com/vi/EDZn9rk6L4M/hq720.jpg', // Evanescence
-  'https://i.ytimg.com/vi/Dx5qFachd3A/hq720.jpg', // Songs for ....
-  'https://i.ytimg.com/vi/W7QZnwKqopo/hq720.jpg', // Big Bang Bloopers
-  'https://i.ytimg.com/vi/KrPt4pXEUcQ/hq720.jpg', // Sia
-  'https://i.ytimg.com/vi/5qap5aO4i9A/hq720.jpg', // Flutter placeholder
-  'https://i.ytimg.com/vi/6lt2JfJdGSY/hqdefault.jpg', // Nature placeholder
-  'https://i.ytimg.com/vi/RvVfgvUGSWE/hqdefault.jpg', // Goals placeholder
-  'https://i.ytimg.com/vi/3zK3uNQTHdw/hqdefault.jpg', // Steak placeholder
-  'https://i.ytimg.com/vi/22HxMVKg0IQ/hqdefault.jpg', // React Native vs Flutter placeholder
-  'https://i.ytimg.com/vi/5qap5aO4i9A/hq720.jpg', // Lofi placeholder
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages8.alphacoders.com%2F136%2Fthumb-1920-1368293.jpeg&f=1&nofb=1&ipt=cd9de08dc7a2f77b548a0e9504a8e47c0be35a1507f2e692ff8a0b3b8f12d140', // Evanescence
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.xtrafondos.com%2Fwallpapers%2Fresoluciones%2F22%2Fmakima-chainsaw-man-opening_1920x1080_10849.jpg&f=1&nofb=1&ipt=9be02f0b83c8d9f2b1e6ba37423fc4522f041a2037257605b64551197ac6df65', // Songs for ....
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.ultimate-manga.com%2Fwallpapers%2Fdesktop-wallpaper-4k-jujutsu-kaisen.jpg&f=1&nofb=1&ipt=eb8a43756e58bfaa75c87cfbe831b902999bdf50b518657ebd6fe50f585316af', // Big Bang Bloopers
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fwp%2Fwp8430817.jpg&f=1&nofb=1&ipt=8e8875a2a8c703ce3dbb674ac3a2af4929b3ef0fb350f94d62a074a921d5a43f', // Sia
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.nichegamer.com%2Fwp-content%2Fuploads%2F2023%2F04%2Fpseudo-harem-04-10-2023-e1681164828660.jpg&f=1&nofb=1&ipt=7f06c05d032d19be60bbb575e4f854a63db9f840bfdb887c7c416e0a9ac5b1df', // Flutter placeholder
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.jbox.com.br%2Fwp%2Fwp-content%2Fuploads%2F2024%2F05%2Fsenpai-otokonoko-destacada-2.jpg&f=1&nofb=1&ipt=b5ea7097ecfd97be5ead46390a0bfdfe978cf9a357919739a24af70868dad21a', // Nature placeholder
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fadala-news.fr%2Fwp-content%2Fuploads%2F2024%2F03%2FSenpai-wa-Otokonoko.webp&f=1&nofb=1&ipt=6d19693d1db8e4d1e6cbc3f1f7d3b21294d67ac86909e505ad90d79a99c6e7af', // Goals placeholder
+  'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.animecorner.me%2F2024%2F03%2F1711257157-86206.png&f=1&nofb=1&ipt=5c9d737546b9334c87c3149cd95a249467a00f5961e4a126bf64f6bc9e7cc2d2', // Steak placeholder
 ];
 
 List<String> _dummyAvatars = List.generate(
   10,
-  (index) => 'https://i.pravatar.cc/40?img=${index + 1}',
+  (index) => 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.animecorner.me%2F2024%2F03%2F1711257157-86206.png&f=1&nofb=1&ipt=5c9d737546b9334c87c3149cd95a249467a00f5961e4a126bf64f6bc9e7cc2d2',
 );
 List<String> _dummyPostImages = List.generate(
   5,
-  (index) => 'https://picsum.photos/seed/${index + 50}/600/400',
+  (index) => 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.nichegamer.com%2Fwp-content%2Fuploads%2F2023%2F04%2Fpseudo-harem-04-10-2023-e1681164828660.jpg&f=1&nofb=1&ipt=7f06c05d032d19be60bbb575e4f854a63db9f840bfdb887c7c416e0a9ac5b1df',
 );
 
 String _randomDuration() {
