@@ -31,7 +31,6 @@ class DynamicBackground extends StatelessWidget {
           randColorList: config.randColorList,
           isRandSize: config.isRandSize,
           onTapAnimation: config.onTapAnimation,
-          enableHover: config.enableHover,
           hoverColor: config.hoverColor,
           hoverRadius: config.hoverRadius,
           connectDots: config.connectDots,
@@ -65,7 +64,6 @@ class DynamicBackground extends StatelessWidget {
           ],
           isRandSize: true,
           onTapAnimation: true,
-          enableHover: true,
           hoverColor: Colors.blueAccent.shade200,
           connectDots: true,
           lineColor: Colors.blue.withOpacity(0.2),
@@ -83,7 +81,6 @@ class DynamicBackground extends StatelessWidget {
           ],
           isRandSize: true,
           onTapAnimation: true,
-          enableHover: true,
           hoverColor: Colors.white,
           connectDots: true,
           lineColor: Colors.white.withOpacity(0.1),
@@ -103,7 +100,6 @@ class DynamicBackground extends StatelessWidget {
           ],
           isRandSize: true,
           onTapAnimation: true,
-          enableHover: true,
           hoverColor: Colors.pinkAccent,
           connectDots: true,
           lineColor: Colors.white.withOpacity(0.15),
@@ -123,7 +119,6 @@ class DynamicBackground extends StatelessWidget {
           ],
           isRandSize: true,
           onTapAnimation: true,
-          enableHover: true,
           hoverColor: Colors.pinkAccent,
           connectDots: true,
           lineColor: Colors.purple.withOpacity(0.2),
@@ -157,7 +152,6 @@ class ParticlesConfig {
   final List<Color> randColorList;
   final bool isRandSize;
   final bool onTapAnimation;
-  final bool enableHover;
   final Color hoverColor;
   final double hoverRadius;
   final bool connectDots;
@@ -174,7 +168,6 @@ class ParticlesConfig {
     this.randColorList = const [Colors.orange, Colors.blue, Colors.teal, Colors.red, Colors.purple],
     this.isRandSize = true,
     this.onTapAnimation = true,
-    this.enableHover = false,
     this.hoverColor = Colors.orangeAccent,
     this.hoverRadius = 80.0,
     this.connectDots = true,
@@ -202,8 +195,6 @@ class DynamicBackgroundBuilder {
     double? hoverRadius,
     bool? connectDots,
     Color? lineColor,
-    double? lineStrokeWidth,
-    double? awayRadius,
     Duration? awayAnimationDuration,
     Curve? awayAnimationCurve,
   }) {
@@ -229,13 +220,10 @@ class DynamicBackgroundBuilder {
                   randColorList: randColorList ?? baseConfig.randColorList,
                   isRandSize: isRandSize ?? baseConfig.isRandSize,
                   onTapAnimation: onTapAnimation ?? baseConfig.onTapAnimation,
-                  enableHover: enableHover ?? baseConfig.enableHover,
                   hoverColor: hoverColor ?? baseConfig.hoverColor,
                   hoverRadius: hoverRadius ?? baseConfig.hoverRadius,
                   connectDots: connectDots ?? baseConfig.connectDots,
                   lineColor: lineColor ?? baseConfig.lineColor,
-                  lineStrokeWidth: lineStrokeWidth ?? baseConfig.lineStrokeWidth,
-                  awayRadius: awayRadius ?? baseConfig.awayRadius,
                   awayAnimationDuration: awayAnimationDuration ?? baseConfig.awayAnimationDuration,
                   awayAnimationCurve: awayAnimationCurve ?? baseConfig.awayAnimationCurve,
                 );

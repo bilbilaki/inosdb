@@ -74,8 +74,9 @@ class Movie {
   });
 
   String? getPosterUrl() {
-    if (posterPath == null || posterPath!.isEmpty || posterPath == "nan")
+    if (posterPath == null || posterPath!.isEmpty || posterPath == "nan") {
       return null;
+    }
     // Handle potential leading slash if it's not already there in the base URL or path
     final path = posterPath!.startsWith('/') ? posterPath! : '/$posterPath';
     return imageBaseUrl + path;
@@ -84,8 +85,9 @@ class Movie {
   String? getBackdropUrl() {
     // Use w780 or original for backdrops for better quality
     const String backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780';
-    if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan")
+    if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan") {
       return null;
+    }
     final path =
         backdropPath!.startsWith('/') ? backdropPath! : '/$backdropPath';
     return backdropBaseUrl + path;
@@ -132,7 +134,9 @@ class Movie {
     List<String> splitStringList(dynamic value) {
       if (value == null ||
           value.toString().isEmpty ||
-          value.toString().toLowerCase() == 'nan') return [];
+          value.toString().toLowerCase() == 'nan') {
+        return [];
+      }
       // Handles simple comma separation, might need adjustment
       // if format is more complex (e.g., JSON string within CSV)
       return value

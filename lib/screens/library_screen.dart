@@ -5,7 +5,7 @@ import 'package:myapp/screens/favorites_screen.dart'; // Import destinations
 import 'package:myapp/screens/settings_screen.dart';
 import 'package:myapp/screens/watchlist_screen.dart';
 import 'package:myapp/utils/colors.dart';
-import 'package:myapp/utils/dynamic_background.dart'; // Keep if you like it
+// Keep if you like it
 
 class LibraryScreen extends StatelessWidget {
  const LibraryScreen({super.key});

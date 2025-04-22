@@ -4,9 +4,12 @@ import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:myapp/providers/anime_provider.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
+import 'package:myapp/router.dart';
 import 'package:myapp/screens/genre_detail_screen.dart'; // Will create this next
 import 'package:myapp/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+
 
 class GenreListScreen extends StatelessWidget {
   const GenreListScreen({super.key});
@@ -54,12 +57,7 @@ class GenreListScreen extends StatelessWidget {
             ),
             child: InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => GenreDetailScreen(genre: genre),
-                          ),
-                        );
+                        context.go('/genre/$genre');
                       },
                       borderRadius: BorderRadius.circular(8.0),
                       child: Container(

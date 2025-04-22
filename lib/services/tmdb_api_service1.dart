@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart'; // For kDebugMode
-import 'package:myapp/models/tvseries_details.dart'; // Import the model
+// Import the model
 
 class TmdbApiService {
   final String _apiKey =

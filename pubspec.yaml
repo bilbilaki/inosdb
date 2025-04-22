@@ -53,6 +53,9 @@ dependencies:
   go_router: ^15.1.0
   flutter_tilt: ^3.2.1
   page_transition: ^2.2.1
+  external_app_launcher: ^4.0.3
+  media_cache_manager: ^0.3.0
+  floating: ^6.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -14,7 +14,7 @@ class ShortsScreen extends StatefulWidget {
 }
 
 class _ShortsScreenState extends State<ShortsScreen> {
-  List<TvSeries> _randomAnimeList = [];
+  final List<TvSeries> _randomAnimeList = [];
   bool _isLoading = true;
 
   @override

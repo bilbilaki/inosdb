@@ -1,15 +1,18 @@
 // lib/screens/search_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:myapp/utils/dynamic_background.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/movie_card.dart'; // Reuse MovieCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
-
+  final String? query;
+  const SearchScreen({this.query, super.key});
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -68,9 +71,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       icon: const Icon(Icons.arrow_back,
                           color: AppColors.iconColor),
                       onPressed: () {
-                        Navigator.of(context).pop();
-                        Provider.of<MovieProvider>(context, listen: false)
-                            .searchMovies('');
+                        //   Navigator.of(context).pop();
+                        //   Provider.of<MovieProvider>(context, listen: false)
+                        //       .searchMovies('');
+                        context.go(AppRoutes.home);
                         _searchController.clear();
                         _searchFocusNode.unfocus(); // Remove focus
                       },
@@ -145,7 +149,13 @@ class _SearchScreenState extends State<SearchScreen> {
                       itemCount: movieProvider.movies.length,
                       itemBuilder: (context, index) {
                         final movie = movieProvider.movies[index];
-                        return MovieCard(movie: movie); // Re-use the movie card
+                        return Tilt(
+                            borderRadius: BorderRadius.circular(12),
+                            tiltConfig: const TiltConfig(
+                              angle: 15,
+                            ),
+                            child: MovieCard(
+                                movie: movie)); // Re-use the movie card
                       },
                     );
                   },

@@ -8,10 +8,11 @@ import 'package:myapp/widgets/movie_card.dart';
 import 'package:myapp/widgets/tv_series_card.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/models/movie.dart';
+
+import 'package:myapp/models/tv_series_anime.dart';
 import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
-import 'package:myapp/models/tv_series_anime.dart';
 
 import 'package:myapp/utils/colors.dart';
 

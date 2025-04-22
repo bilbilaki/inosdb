@@ -25,8 +25,9 @@ class MovieProvider extends ChangeNotifier {
   }
 
   Future<void> loadMovies() async {
-    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded) return; // Prevent multiple loads
 
+    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded) return; // Prevent multiple loads
+    _searchQuery = '';
     _status = LoadingStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -63,8 +64,8 @@ class MovieProvider extends ChangeNotifier {
     }
   }
 
-  void searchMovies(String query) {
-    _searchQuery = query.toLowerCase().trim();
+  void searchMovies(String? query) {
+    _searchQuery = query?.toLowerCase().trim() ?? '';
     if (_searchQuery.isEmpty) {
       _searchResults = _movies; // Show all if query is empty
     } else {

@@ -2,11 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:myapp/models/tv_series.dart';
-import 'package:myapp/screens/tv_series_details_screen.dart'; // Correct screen
+//import 'package:myapp/screens/tv_series_details_screen.dart'; // Correct screen
 import 'package:myapp/utils/colors.dart'; // Assuming AppColors exists
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:myapp/services/user_data_service.dart';
 import 'package:provider/provider.dart'; // For accessing UserDataService
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class TvSeriesCard extends StatelessWidget {
   final TvSeries series;
@@ -37,12 +39,13 @@ class TvSeriesCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (series.tmdbId != 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TvSeriesDetailsScreen(tvSeriesId: series.tmdbId),
-            ),
-          );
+          //Navigator.push(
+          //  context,
+          //  MaterialPageRoute(
+          //    builder: (_) => TvSeriesDetailsScreen(tvSeriesId: series.tmdbId),
+          //  ),
+          //);
+          context.go('/tv/${series.tmdbId}');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -222,7 +225,7 @@ class TvSeriesCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Language: ${series.originalLanguage?.toUpperCase() ?? 'N/A'}',
+                    'Language: ${series.originalLanguage.toUpperCase() ?? 'N/A'}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,

@@ -1,5 +1,6 @@
 // lib/screens/search_screen_tv.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/utils/dynamic_background.dart'; // Optional background
 import 'package:provider/provider.dart';
@@ -7,9 +8,12 @@ import 'package:myapp/providers/tv_series_provider.dart'; // Use TvSeriesProvide
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/tv_series_card.dart'; // Use TvSeriesCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreenTv extends StatefulWidget {
- const SearchScreenTv({super.key});
+  final String? query;
+ const SearchScreenTv({ this.query, super.key});
 
  @override
  State<SearchScreenTv> createState() => _SearchScreenTvState();
@@ -64,7 +68,7 @@ class _SearchScreenTvState extends State<SearchScreenTv> {
  _performSearch(''); // Clear search on back
  _searchController.clear();
  _searchFocusNode.unfocus();
- Navigator.of(context).pop();
+ context.go(AppRoutes.home);
  },
  ),
  Expanded(
@@ -136,7 +140,12 @@ class _SearchScreenTvState extends State<SearchScreenTv> {
  itemCount: results.length,
  itemBuilder: (context, index) {
  final series = results[index];
- return TvSeriesCard(series: series); // Use TvSeriesCard
+ return Tilt(
+          borderRadius: BorderRadius.circular(12),
+          tiltConfig: const TiltConfig(
+            angle: 15,
+          ),
+          child: TvSeriesCard(series: series)); // Use TvSeriesCard
  },
  );
  },

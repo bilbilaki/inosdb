@@ -49,7 +49,7 @@ class AnimeProvider extends ChangeNotifier {
 
       final Map<int, TvSeriesAnime> tempAnimeSeriesMap = {};
       // Using a temporary map to store series names -> tmdb_id for linking episodes later
-      final Map<String, int> animeseriesName_to_TmdbId_Map = {};
+      final Map<String, int> animeseriesnameToTmdbidMap = {};
 
       for (final row in detailsCsvTable.skip(1)) { // Skip header row
         try {
@@ -57,10 +57,10 @@ class AnimeProvider extends ChangeNotifier {
           if (animeseries.tmdbId != 0) { // Use TMDB ID as the primary key
               tempAnimeSeriesMap[animeseries.tmdbId] = animeseries;
               // Store the mapping: case-insensitive name from details CSV to its TMDB ID
-              animeseriesName_to_TmdbId_Map[animeseries.originalName.trim().toLowerCase()] = animeseries.tmdbId;
+              animeseriesnameToTmdbidMap[animeseries.originalName.trim().toLowerCase()] = animeseries.tmdbId;
                // Also map the potentially different 'series' name if it exists and differs
               if (row.length > 1 && row[1] != null && row[1].toString().trim().toLowerCase() != animeseries.originalName.trim().toLowerCase()) {
-                   animeseriesName_to_TmdbId_Map[row[1].toString().trim().toLowerCase()] = animeseries.tmdbId;
+                   animeseriesnameToTmdbidMap[row[1].toString().trim().toLowerCase()] = animeseries.tmdbId;
               }
           } else {
               if (kDebugMode) {
@@ -77,7 +77,7 @@ class AnimeProvider extends ChangeNotifier {
       }
 
       if (kDebugMode) {
-         print("Loaded ${tempAnimeSeriesMap.length} series details. Name mapping count: ${animeseriesName_to_TmdbId_Map.length}");
+         print("Loaded ${tempAnimeSeriesMap.length} series details. Name mapping count: ${animeseriesnameToTmdbidMap.length}");
       }
 
       // 2. Load Episodes CSV
@@ -94,18 +94,16 @@ class AnimeProvider extends ChangeNotifier {
 
           // *** IMPORTANT JOIN LOGIC ***
           // Attempt to find the TMDB ID using the name from the episode CSV
-          int? targetTmdbId = animeseriesName_to_TmdbId_Map[animeseriesNameLower];
+          int? targetTmdbId = animeseriesnameToTmdbidMap[animeseriesNameLower];
 
           if (targetTmdbId != null) {
                try {
                  final episode = EpisodeAnime.fromCsvInfo(animeseriesNameFromEpisodeCsv, targetTmdbId, row); // Pass targetTmdbId
-                 if (episode != null) {
-                    if (!tempEpisodesByTmdbId.containsKey(targetTmdbId)) {
-                       tempEpisodesByTmdbId[targetTmdbId] = [];
-                     }
-                  tempEpisodesByTmdbId[targetTmdbId]!.add(episode);
-                 }
-               } catch (e) {
+                  if (!tempEpisodesByTmdbId.containsKey(targetTmdbId)) {
+                     tempEpisodesByTmdbId[targetTmdbId] = [];
+                   }
+                tempEpisodesByTmdbId[targetTmdbId]!.add(episode);
+                              } catch (e) {
                   if (kDebugMode) {
                     print("Error parsing episode from row for series '$animeseriesNameFromEpisodeCsv' (mapped to $targetTmdbId): $row -> $e");
                    }
@@ -114,7 +112,7 @@ class AnimeProvider extends ChangeNotifier {
                // If the name wasn't found in the map
                 if (kDebugMode) {
                   // This indicates a mismatch or missing series in the details CSV
-                  print("Warning: Could not find matching TMDB ID for series name '${animeseriesNameFromEpisodeCsv}' from episodes CSV.");
+                  print("Warning: Could not find matching TMDB ID for series name '$animeseriesNameFromEpisodeCsv' from episodes CSV.");
                  // Optionally, try a fallback or log more prominently
                }
            }

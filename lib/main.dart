@@ -1,18 +1,20 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:media_cache_manager/media_cache_manager.dart';
 import 'package:myapp/providers/anime_provider.dart';
 import 'package:myapp/services/user_data_service.dart'; // Import UserDataService
 import 'package:provider/provider.dart';
 import 'package:myapp/app_shell.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
-import 'package:myapp/utils/colors.dart';
 import 'package:media_kit/media_kit.dart';
 import 'router.dart';
 
-void main() {
+Future<void> main() async {
  WidgetsFlutterBinding.ensureInitialized();
  MediaKit.ensureInitialized();
+ await MediaCacheManager.instance.init();
+
 
  runApp(
  MultiProvider(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/models/season_anime.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:myapp/models/tv_series_anime.dart'; // Import TvSeries
+// Import TvSeries
 import 'package:myapp/providers/anime_provider.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/anime_episodes_tile.dart'; // Import EpisodeTile

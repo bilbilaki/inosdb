@@ -9,7 +9,6 @@ import 'package:myapp/models/tv_series_anime.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
 import 'package:myapp/providers/anime_provider.dart';
-
 import 'package:myapp/services/user_data_service.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/movie_card.dart'; // Reuse existing cards
@@ -49,19 +48,19 @@ class FavoritesScreen extends StatelessWidget {
     String nameA;
     if (a is Movie) {
       nameA = a.title;
-    } else if (a is TvSeries) {
+    } else if (a is TvSeriesAnime) {
       nameA = a.name;
     } else {
-      nameA = (a as TvSeriesAnime).name; // Assuming Anime model has a 'title' or 'name' field
+      nameA = (a as TvSeries).name; // Assuming Anime model has a 'title' or 'name' field
     }
 
     String nameB;
     if (b is Movie) {
       nameB = b.title;
-    } else if (b is TvSeries) {
+    } else if (b is TvSeriesAnime) {
       nameB = b.name;
     } else {
-      nameB = (b as TvSeriesAnime).name; // Assuming Anime model has a 'title' or 'name' field
+      nameB = (b as TvSeries).name; // Assuming Anime model has a 'title' or 'name' field
     }
 
     return nameA.toLowerCase().compareTo(nameB.toLowerCase());

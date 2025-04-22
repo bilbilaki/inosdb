@@ -2,12 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:myapp/models/tv_series_anime.dart';
-import 'package:myapp/screens/anime_details_screen.dart';
+//import 'package:myapp/screens/anime_details_screen.dart';
 import 'package:myapp/utils/colors.dart'; // Assuming AppColors exists
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:myapp/services/user_data_service.dart';
 //import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart'; // For accessing UserDataService
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class AnimeSeriesCard extends StatelessWidget {
   final TvSeriesAnime series;
@@ -38,12 +40,7 @@ class AnimeSeriesCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (series.tmdbId != 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AnimeDetailsScreen(tvSeriesId: series.tmdbId),
-            ),
-          );
+          context.go('/anime/${series.tmdbId}');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -87,8 +84,7 @@ class AnimeSeriesCard extends StatelessWidget {
                                   size: 30,
                                 ),
                               ),
-                              fadeInDuration:
-                                  const Duration(milliseconds: 300),
+                              fadeInDuration: const Duration(milliseconds: 300),
                               fadeOutDuration:
                                   const Duration(milliseconds: 300),
                             )
@@ -110,9 +106,7 @@ class AnimeSeriesCard extends StatelessWidget {
                         // Favorite Button
                         IconButton(
                           icon: Icon(
-                            isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
                             color: isFavorite ? Colors.red : Colors.white,
                             size: 20,
                           ),
@@ -143,9 +137,7 @@ class AnimeSeriesCard extends StatelessWidget {
                             isInWatchlist
                                 ? Icons.bookmark
                                 : Icons.bookmark_border,
-                            color: isInWatchlist
-                                ? Colors.green
-                                : Colors.white,
+                            color: isInWatchlist ? Colors.green : Colors.white,
                             size: 20,
                           ),
                           onPressed: () async {
@@ -223,7 +215,7 @@ class AnimeSeriesCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Language: ${series.originalLanguage?.toUpperCase() ?? 'N/A'}',
+                    'Language: ${series.originalLanguage.toUpperCase() ?? 'N/A'}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,

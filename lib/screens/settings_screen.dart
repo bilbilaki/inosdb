@@ -76,7 +76,7 @@ class SettingsScreen extends StatelessWidget {
                  context: context,
                  applicationName: 'My Media App',
                  applicationVersion: '1.0.0', // Get from pubspec later
-                 applicationLegalese: '© Your Name/Company',
+                 applicationLegalese: '© Inosuke/Company',
                  // applicationIcon: Image.asset('assets/icon.png', width: 40,), // Your app icon
                );
             },

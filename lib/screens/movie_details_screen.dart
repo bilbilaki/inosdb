@@ -1,14 +1,16 @@
 // lib/screens/movie_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:myapp/models/movie.dart'; // Import VideoInfo
-import 'package:myapp/services/user_data_service.dart'; // Import UserDataService
+// Import UserDataService
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/screens/video_player_screen.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-
+import 'package:external_app_launcher/external_app_launcher.dart';
+import 'package:go_router/go_router.dart';
+import 'package:myapp/router.dart';
 class MovieDetailsScreen extends StatelessWidget {
   final int movieId;
 
@@ -26,7 +28,6 @@ class MovieDetailsScreen extends StatelessWidget {
       return;
     }
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +254,11 @@ class MovieDetailsScreen extends StatelessWidget {
                             foregroundColor: AppColors.primaryText,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 25, vertical: 12)),
-                        onPressed: () {
+                        onPressed: () async {
+                          _realDownloadinglink(context, downloadLinks);
+
+                          // openStore: false
+
                           // TODO: Implement actual download logic
                           ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -352,11 +357,69 @@ class MovieDetailsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(dialogContext); // Close the dialog
                 // Navigate to the Video Player Screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => VideoPlayerScreen(videoUrl: link),
-                  ),
+                 final encodedUrl = Uri.encodeComponent(link);
+    context.go('/video/$encodedUrl');
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => VideoPlayerScreen(videoUrl: link),
+                //   ),
+                // );
+              },
+              padding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+              child: Text(
+                '$qualityGuess - ${Uri.parse(link).host}', // Show quality guess and domain
+                style:
+                    const TextStyle(color: AppColors.primaryText, fontSize: 14),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  void _realDownloadinglink(BuildContext context, List<String> links) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return SimpleDialog(
+          title: const Text('Select Quality / Source'),
+          titleTextStyle: const TextStyle(
+              color: AppColors.primaryText,
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
+          backgroundColor: AppColors.secondaryBackground,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          children: links.map((link) {
+            // Try to guess quality from URL (very basic)
+            String qualityGuess = "Unknown";
+            if (link.contains('1080p')) {
+              qualityGuess = "1080p";
+            } else if (link.contains('720p'))
+              qualityGuess = "720p";
+            else if (link.contains('480p'))
+              qualityGuess = "480p";
+            else if (link.contains('BluRay'))
+              qualityGuess += " BluRay";
+            else if (link.contains('HEVC') || link.contains('x265'))
+              qualityGuess += " HEVC";
+            else if (link.contains('x264')) qualityGuess += " x264";
+
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(dialogContext); // Close the dialog
+                // Navigate to the Video Player Screen
+                
+                LaunchApp.openApp(
+                  androidPackageName: 'com.android.downloader',
+                  iosUrlScheme: 'downloader://$link',
+                  appStoreLink:
+                      'itms-apps://itunes.apple.com/us/app/pulse-secure/id945832041',
                 );
               },
               padding:

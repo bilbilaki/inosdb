@@ -8,12 +8,17 @@ import 'package:myapp/screens/search_screen_anime.dart';
 import 'package:myapp/screens/search_screen_tv.dart';
 import 'package:myapp/screens/search_screen.dart'; // Navigate to SearchScreen
 import 'package:myapp/utils/colors.dart';
-import 'package:myapp/app_shell.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
 import 'package:myapp/screens/tv_series_details_screen.dart';
-
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:myapp/screens/anime_grid_screen.dart';
+import 'package:myapp/models/tv_series_anime.dart';
+import 'package:myapp/providers/anime_provider.dart';
+import 'package:myapp/models/season_anime.dart';
+import 'package:myapp/screens/unisearch_screen.dart';
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onMenuPressed;
   final int selectedIndex;
@@ -58,23 +63,9 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.search_outlined, color: AppColors.iconColor),
           onPressed: () {
-            if (selectedIndex == 0) {
-              // Option 1: Navigate to a dedicated Search Screen
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SearchScreen()));
-            } else if (selectedIndex == 1) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SearchScreenTv()));
-            } else if (selectedIndex == 2) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SearchScreenAnime()));
-            } else if (selectedIndex >= 3) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SearchScreen()));
-
+            context.go('/unifiedsearch');
               // Option 2: Show Search Delegate (more integrated)
               // showSearch(context: context, delegate: MovieSearchDelegate());
-            }
           },
           tooltip: 'Search Movies',
         ),

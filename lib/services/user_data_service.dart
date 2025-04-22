@@ -6,9 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserDataService extends ChangeNotifier {
   static const String _favoriteMoviesKey = 'favoriteMovies';
   static const String _favoriteTvSeriesKey = 'favoriteTvSeries';
-  static const String _favoriteAnimeKey = 'favoriteTvSeries';
+  static const String _favoriteAnimeKey = 'favoriteAnime';
   static const String _watchlistMoviesKey = 'watchlistMovies';
-  static const String _watchlistAnimeKey = 'watchlistMovies';
+  static const String _watchlistAnimeKey = 'watchlistAnime';
   static const String _watchlistTvSeriesKey = 'watchlistTvSeries';
   // Add keys for history, downloads if implemented later
 
@@ -19,7 +19,6 @@ class UserDataService extends ChangeNotifier {
   List<int> _favoriteTvSeriesIds = [];
   List<int> _watchlistMovieIds = [];
   List<int> _watchlistAnimeIds = [];
-
   List<int> _watchlistTvSeriesIds = [];
 
   List<int> get favoriteMovieIds => List.unmodifiable(_favoriteMovieIds);
@@ -57,7 +56,7 @@ class UserDataService extends ChangeNotifier {
 
   // --- Favorites ---
   bool isFavoriteMovie(int movieId) => _favoriteMovieIds.contains(movieId);
-  bool isFavoriteAnime(int animeId) => _favoriteMovieIds.contains(animeId);
+  bool isFavoriteAnime(int animeId) => _favoriteAnimeIds.contains(animeId);
   bool isFavoriteTvSeries(int seriesId) => _favoriteTvSeriesIds.contains(seriesId);
 
   Future<void> toggleFavoriteMovie(int movieId) async {
@@ -68,9 +67,9 @@ class UserDataService extends ChangeNotifier {
     notifyListeners();
   }
     Future<void> toggleFavoriteAnime(int animeId) async {
-    isFavoriteMovie(animeId)
-        ? _favoriteMovieIds.remove(animeId)
-        : _favoriteMovieIds.add(animeId);
+    isFavoriteAnime(animeId)
+        ? _favoriteAnimeIds.remove(animeId)
+        : _favoriteAnimeIds.add(animeId);
     await _setIntList(_favoriteAnimeKey, _favoriteAnimeIds);
     notifyListeners();
   }
@@ -85,7 +84,7 @@ class UserDataService extends ChangeNotifier {
 
   // --- Watchlist ---
    bool isOnWatchlistMovie(int movieId) => _watchlistMovieIds.contains(movieId);
-  bool isOnWatchlistAnime(int animeId) => _watchlistMovieIds.contains(animeId);
+  bool isOnWatchlistAnime(int animeId) => _watchlistAnimeIds.contains(animeId);
 
    bool isOnWatchlistTvSeries(int seriesId) => _watchlistTvSeriesIds.contains(seriesId);
 
@@ -97,9 +96,9 @@ class UserDataService extends ChangeNotifier {
     notifyListeners();
   }
 Future<void> toggleWatchlistAnime(int animeId) async {
-    isOnWatchlistMovie(animeId)
-        ? _watchlistMovieIds.remove(animeId)
-        : _watchlistMovieIds.add(animeId);
+    isOnWatchlistAnime(animeId)
+        ? _watchlistAnimeIds.remove(animeId)
+        : _watchlistAnimeIds.add(animeId);
     await _setIntList(_watchlistAnimeKey, _watchlistAnimeIds);
     notifyListeners();
   }

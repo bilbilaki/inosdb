@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:myapp/providers/anime_provider.dart'; // Ensure correct provider import
 import 'package:myapp/utils/colors.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:myapp/widgets/anime_series_card.dart';
 import 'package:myapp/utils/dynamic_background.dart'; // Keep if using
 import 'package:flutter_tilt/flutter_tilt.dart';
 

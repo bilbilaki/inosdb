@@ -1,5 +1,6 @@
 // lib/screens/search_screen_tv.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:myapp/models/tv_series_anime.dart';
 import 'package:myapp/utils/dynamic_background.dart'; // Optional background
 import 'package:provider/provider.dart';
@@ -7,9 +8,12 @@ import 'package:myapp/providers/anime_provider.dart'; // Use AnimeProvider
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/anime_series_card.dart'; // Use AnimeSeriesCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreenAnime extends StatefulWidget {
- const SearchScreenAnime({super.key});
+  final String? query;
+ const SearchScreenAnime({ this.query, super.key});
 
  @override
  State<SearchScreenAnime> createState() => _SearchScreenAnimeState();
@@ -64,7 +68,7 @@ class _SearchScreenAnimeState extends State<SearchScreenAnime> {
  _performSearch(''); // Clear search on back
  _searchController.clear();
  _searchFocusNode.unfocus();
- Navigator.of(context).pop();
+ context.go(AppRoutes.home);
  },
  ),
  Expanded(
@@ -75,7 +79,7 @@ class _SearchScreenAnimeState extends State<SearchScreenAnime> {
  style: const TextStyle(color: AppColors.primaryText, fontSize: 18),
  cursorColor: AppColors.accentColor,
  decoration: InputDecoration(
- hintText: 'Search TV series...', // Updated hint
+ hintText: 'Search Anime Series...', // Updated hint
  hintStyle: TextStyle(color: AppColors.secondaryText.withOpacity(0.7)),
  border: InputBorder.none,
  suffixIcon: _searchController.text.isNotEmpty
@@ -107,7 +111,7 @@ class _SearchScreenAnimeState extends State<SearchScreenAnime> {
  if (query.isEmpty) {
  return const Center(
  child: Text(
- 'Start typing to search for TV series...', // Updated message
+ 'Start typing to search for Anime Series...', // Updated message
  style: TextStyle(color: AppColors.secondaryText)
  )
  );
@@ -136,7 +140,12 @@ class _SearchScreenAnimeState extends State<SearchScreenAnime> {
  itemCount: results.length,
  itemBuilder: (context, index) {
  final series = results[index];
- return AnimeSeriesCard(series: series); // Use AnimeSeriesCard
+ return Tilt(
+          borderRadius: BorderRadius.circular(12),
+          tiltConfig: const TiltConfig(
+            angle: 15,
+          ),
+          child: AnimeSeriesCard(series: series)); // Use AnimeSeriesCard
  },
  );
  },

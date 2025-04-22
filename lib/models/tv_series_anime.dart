@@ -128,7 +128,7 @@ class TvSeriesAnime {
   // Factory constructor to create from CSV row data
   factory TvSeriesAnime.fromCsvRow(List<dynamic> row) {
     // Ensure row has enough columns to avoid RangeError
-    dynamic safeGet(int index, [dynamic defaultValue = null]) {
+    dynamic safeGet(int index, [dynamic defaultValue]) {
          return (row.length > index && row[index] != null) ? row[index] : defaultValue;
      }
 

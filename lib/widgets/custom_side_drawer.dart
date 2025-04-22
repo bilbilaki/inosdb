@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/app_shell.dart';
-import 'package:myapp/router.dart';
 
 class CustomSideDrawer extends StatelessWidget {
   CustomSideDrawer({super.key});
@@ -32,15 +31,7 @@ class CustomSideDrawer extends StatelessWidget {
                 // Add Logo and Menu button like in AppBar
                 child: Row(
                   children: [
-                    IconButton(
-                        icon:
-                            const Icon(Icons.menu, color: AppColors.iconColor),
-                        onPressed: () {
-                          _driver.isDrawerOpen = true;
-                          _driver.toggleDrawer();
-                          // Use Provider or callback to close the drawer
-                          // Use go_router's pop
-                        }),
+                    
                     const SizedBox(width: 10),
                     Image.asset(
                       'assets/YouTube.png',
@@ -56,15 +47,15 @@ class CustomSideDrawer extends StatelessWidget {
             }),
             //  Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
 
-            _buildDrawerItem(Icons.explore_outlined, 'Explore', () {
+            _buildDrawerItem(Icons.live_tv_rounded, 'TvSeries', () {
               context.go(
                   '/tv'); // or context.push('/favorites') if you want to maintain stack
             }),
-            _buildDrawerItem(Icons.movie_outlined, 'Shorts', () {
+            _buildDrawerItem(Icons.movie_outlined, 'Anime', () {
               context.go(
                   '/anime'); // or context.push('/favorites') if you want to maintain stack
             }),
-            _buildDrawerItem(Icons.subscriptions_outlined, 'Subscriptions', () {
+            _buildDrawerItem(Icons.category_outlined, 'Genres', () {
               context.go(
                   '/genres'); // or context.push('/favorites') if you want to maintain stack
             }),
@@ -72,31 +63,22 @@ class CustomSideDrawer extends StatelessWidget {
             _buildDrawerItem(Icons.video_library_outlined, 'Library', () {
               //        Navigator.push(context, MaterialPageRoute(builder: (context) => const LibraryScreen()));
             }),
-            _buildDrawerItem(Icons.history_outlined, 'History', () {
+            _buildDrawerItem(Icons.settings_outlined, 'Settings', () {
               context.go(
                   '/settings');
             }),
-            _buildDrawerItem(Icons.slideshow_outlined, 'Your videos', () {
+            _buildDrawerItem(Icons.watch_later_outlined, 'Watchlist', () {
               context.go(
                   '/watchlist'); // or context.push('/favorites') if you want to maintain stack
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Your videos is not implemented yet')));
+              
             }),
             _buildDrawerItem(Icons.download_outlined, 'Downloads', () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Downloads is not implemented yet')));
+              
             }),
-            _buildDrawerItem(Icons.thumb_up_outlined, 'Liked videos', () {
+            _buildDrawerItem(Icons.favorite_border_sharp, 'Favorites', () {
               context.go(
                   '/favorites'); // or context.push('/favorites') if you want to maintain stack
-              const Divider(color: AppColors.dividerColor, height: 1);
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('Subscriptions',
-                    style: TextStyle(
-                        color: AppColors.primaryText,
-                        fontWeight: FontWeight.bold)),
-              );
+             
             }),
             // TODO: Add list of subscribed channels here
             _buildDrawerItem(Icons.person_pin, 'Channel 1', () {

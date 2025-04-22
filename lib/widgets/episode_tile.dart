@@ -1,8 +1,10 @@
 // lib/widgets/episode_tile.dart
 import 'package:flutter/material.dart';
 import 'package:myapp/models/episode.dart';
-import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
+//import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
 import 'package:myapp/utils/colors.dart';
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class EpisodeTile extends StatelessWidget {
   final Episode episode;
@@ -10,13 +12,14 @@ class EpisodeTile extends StatelessWidget {
   const EpisodeTile({required this.episode, super.key});
 
   void _playVideo(BuildContext context, String url) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => VideoPlayerScreen(videoUrl: url),
-      ),
-    );
-  }
+ //    Navigator.push(
+ //     context,
+ //     MaterialPageRoute(
+ //       builder: (_) => VideoPlayerScreen(videoUrl: url),
+ //     ),
+ //   );
+ final encodedUrl = Uri.encodeComponent(url);
+    context.go('/video/$encodedUrl');  }
 
   @override
   Widget build(BuildContext context) {

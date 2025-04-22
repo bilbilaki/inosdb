@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:myapp/models/movie.dart';
-import 'package:myapp/screens/movie_details_screen.dart'; // Navigate to details
+  //import 'package:myapp/screens/movie_details_screen.dart'; // Navigate to details
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/services/user_data_service.dart';
 import 'package:provider/provider.dart'; // For accessing UserDataService
+import 'package:myapp/router.dart';
+import 'package:go_router/go_router.dart';
 
 class MovieCard extends StatelessWidget {
   final Movie movie;
@@ -24,12 +26,13 @@ class MovieCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         // Navigate to Movie Details Screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MovieDetailsScreen(movieId: movie.id), // Pass movie ID
-          ),
-        );
+        //  Navigator.push(
+        //  context,
+        //  MaterialPageRoute(
+        //    builder: (_) => MovieDetailsScreen(movieId: movie.id), // Pass movie ID
+        //  ),
+        //);
+        context.go('/movie/${movie.id}');
       },
       child: Card(
         color: Colors.transparent, // Make card transparent, container handles bg
@@ -198,7 +201,7 @@ class MovieCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Language: ${movie.originalLanguage?.toUpperCase() ?? 'N/A'}',
+                    'Language: ${movie.originalLanguage.toUpperCase() ?? 'N/A'}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,
@@ -208,7 +211,7 @@ class MovieCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Popularity: ${movie.popularity?.toStringAsFixed(1) ?? 'N/A'}',
+                    'Popularity: ${movie.popularity.toStringAsFixed(1) ?? 'N/A'}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,
