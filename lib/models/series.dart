@@ -29,7 +29,7 @@ class TvShow {
   final String? source; // Make nullable
   final String? rawDownloadLinks; // Store the raw string
 
-  static const String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
+  static const String imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
 
   TvShow({
     required this.id,
@@ -69,7 +69,7 @@ class TvShow {
 
   String? getBackdropUrl() {
     // Use w780 or original for backdrops for better quality
-    const String backdropBaseUrl = 'https://image.tmdb.org/t/p/original';
+    const String backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/original';
     if (posterPath == null || posterPath!.isEmpty || posterPath == "nan") return null;
     final path = posterPath!.startsWith('/') ? posterPath! : '/$posterPath';
     return backdropBaseUrl + path;

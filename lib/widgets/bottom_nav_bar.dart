@@ -55,17 +55,28 @@ class BottomNavBar extends StatelessWidget {
           // activeIcon: Icon(Icons.tiktok),
           // label: 'Shorts',
         //),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.subscriptions_outlined),
-          activeIcon: Icon(Icons.subscriptions),
-          label: 'Subscriptions',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.video_library_outlined),
-          activeIcon: Icon(Icons.video_library),
-          label: 'Library',
-        ),
+    //    BottomNavigationBarItem(
+      //    icon: Icon(Icons.subscriptions_outlined),
+      //    activeIcon: Icon(Icons.subscriptions),
+      //    label: 'Subscriptions',
+      //  ),
+      //  BottomNavigationBarItem(
+      //    icon: Icon(Icons.video_library_outlined),
+      //    activeIcon: Icon(Icons.video_library),
+      //    label: 'Library',
+      //  ),
+      BottomNavigationBarItem(
+       icon: Icon(Icons.movie_filter_outlined), // Changed Icon
+       activeIcon: Icon(Icons.movie_filter),   // Changed Icon
+       label: 'Genres',                     // Changed Label
+     ),
+     BottomNavigationBarItem( // Index 4 (Library) is now after the gap
+       icon: Icon(Icons.video_library_outlined),
+       activeIcon: Icon(Icons.video_library),
+       label: 'Library',
+     ),
       ],
+
     );
   }
 }

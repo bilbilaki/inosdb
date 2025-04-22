@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<!-- Add WRITE_EXTERNAL_STORAGE if targeting older Android versions or explicitly needing it -->
+<!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" /> -->
+ <!-- For Android 13+ precise photo/video access -->
+ <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+ <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <application
         android:label="myapp"
         android:name="${applicationName}"

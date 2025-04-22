@@ -15,7 +15,7 @@ class TvSeriesDetails {
   // Add any other fields you need from the TMDB response
 
   // Base URL for images (you can choose different sizes like w500, w780, original)
-  static const String _imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
+  static const String _imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/original';
 
   TvSeriesDetails({
     required this.id,

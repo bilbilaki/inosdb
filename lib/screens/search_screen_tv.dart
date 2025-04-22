@@ -1,5 +1,6 @@
 // lib/screens/search_screen_tv.dart
 import 'package:flutter/material.dart';
+import 'package:myapp/models/tv_series.dart';
 import 'package:myapp/utils/dynamic_background.dart'; // Optional background
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/tv_series_provider.dart'; // Use TvSeriesProvider
@@ -100,7 +101,7 @@ class _SearchScreenTvState extends State<SearchScreenTv> {
  Expanded(
  child: Consumer<TvSeriesProvider>( // Use TvSeriesProvider
  builder: (context, seriesProvider, child) {
- final results = seriesProvider.searchResults;
+ final results = seriesProvider.seriesForDisplay;
  final query = seriesProvider.searchQuery;
 
  if (query.isEmpty) {

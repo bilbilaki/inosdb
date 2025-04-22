@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:myapp/models/tvseries_details.dart';
 import 'package:myapp/providers/tv_series_provider.dart';
-import 'package:myapp/services/tmdb_api_service.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/utils/dynamic_background.dart';
 import 'package:csv/csv.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:myapp/services/image_cache_service.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -52,7 +52,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? _searchResult;
   Map<String, dynamic>? _searchData;
   TvSeriesProvider? _tvSeriesProvider;
-  TmdbApiService? _tmdbApiService;
   final String _apiKey = '607e40af5bb66576f6fd7252d5529e24';
   static const String _imageBaseUrl = 'https://image.tmdb.org/t/p/original';
   static const String _backdropBaseUrl = 'https://image.tmdb.org/t/p/w780';
@@ -224,363 +223,322 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _importFromCsv() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['csv'],
-      );
-
-      if (result != null) {
-        final file = File(result.files.single.path!);
-        final csvString = await file.readAsString();
-        List<List<dynamic>> rowsAsListOfValues =
-            const CsvToListConverter().convert(csvString);
-
-        // Skip header row
-        if (rowsAsListOfValues.length > 1) {
-          setState(() {
-            _episodes.clear();
-            for (var i = 1; i < rowsAsListOfValues.length; i++) {
-              var row = rowsAsListOfValues[i];
-              if (row.length >= 5) {
-                _episodes.add(EpisodeData(
-                  episodeNumber: int.tryParse(row[1].toString()) ?? i,
-                  link1080p: row[2].toString(),
-                  link720p: row[3].toString(),
-                  link480p: row[4].toString(),
-                  subtitle: row.length > 5 ? row[5].toString() : null,
-                ));
-              }
-            }
-          });
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error importing CSV: $e')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: DynamicBackground(
-        theme: ParticlesTheme.dark,
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                backgroundColor: AppColors.secondaryBackground,
-                title: const Text('Add Season',
-                    style: TextStyle(color: AppColors.primaryText)),
-                leading: IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.iconColor),
-                  onPressed: () => Navigator.of(context).pop(),
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: DynamicBackground(
+          theme: ParticlesTheme.dark,
+          child: SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: AppColors.secondaryBackground,
+                  title: const Text('Add Season',
+                      style: TextStyle(color: AppColors.primaryText)),
+                  leading: IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.iconColor),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: _importFromCsv,
+                      child: const Text(
+                        'Import CSV',
+                        style: TextStyle(color: Colors.blueAccent),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // TODO: Save season data
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        'SAVE',
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: _importFromCsv,
-                    child: const Text(
-                      'Import CSV',
-                      style: TextStyle(color: Colors.blueAccent),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Save season data
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'SAVE',
-                      style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Movie/Series Switch
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Text('Movie',
-                              style: TextStyle(color: AppColors.primaryText)),
-                          Switch(
-                            value: _isMovie,
-                            onChanged: (value) => setState(() {
-                              _isMovie = value;
-                              _searchData = null;
-                              _searchResult = null;
-                            }),
-                          ),
-                          const Text('Series',
-                              style: TextStyle(color: AppColors.primaryText)),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      // Search Field
-                      TextField(
-                        controller: _nameController,
-                        style: const TextStyle(color: AppColors.primaryText),
-                        decoration: const InputDecoration(
-                          labelText: 'Search by name',
-                          labelStyle: TextStyle(color: AppColors.secondaryText),
-                          border: OutlineInputBorder(),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Movie/Series Switch
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Text('Movie',
+                                style: TextStyle(color: AppColors.primaryText)),
+                            Switch(
+                              value: _isMovie,
+                              onChanged: (value) => setState(() {
+                                _isMovie = value;
+                                _searchData = null;
+                                _searchResult = null;
+                              }),
+                            ),
+                            const Text('Series',
+                                style: TextStyle(color: AppColors.primaryText)),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: _searchContent,
-                        icon: const Icon(Icons.search),
-                        label: const Text('Search'),
-                      ),
-                      if (_searchResult != null) ...[
-                        const SizedBox(height: 10),
-                        Text(
-                          _searchResult!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ],
-                      if (_searchData != null) ...[
                         const SizedBox(height: 20),
-                        Card(
-                          color: AppColors.secondaryBackground,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (_searchData!['poster_path'] != null)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Container(
-                                      height: 250,
-                                      width: double.infinity,
-                                      alignment: Alignment.center,
-                                      child: Image.network(
-                                        '$_imageBaseUrl${_searchData!['poster_path']}',
+                        // Search Field
+                        TextField(
+                          controller: _nameController,
+                          style: const TextStyle(color: AppColors.primaryText),
+                          decoration: const InputDecoration(
+                            labelText: 'Search by name',
+                            labelStyle:
+                                TextStyle(color: AppColors.secondaryText),
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton.icon(
+                          onPressed: _searchContent,
+                          icon: const Icon(Icons.search),
+                          label: const Text('Search'),
+                        ),
+                        if (_searchResult != null) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            _searchResult!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ],
+                        if (_searchData != null) ...[
+                          const SizedBox(height: 20),
+                          Card(
+                            color: AppColors.secondaryBackground,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_searchData!['poster_path'] != null)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
                                         height: 250,
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Container(
-                                            height: 250,
-                                            color: Colors.grey[800],
-                                            child: const Center(
-                                              child: Icon(
-                                                Icons.error_outline,
-                                                color: Colors.white,
-                                                size: 50,
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        width: double.infinity,
+                                        alignment: Alignment.center,
+                                        child:
+                                            ImageCacheService().getCachedImage(
+                                          imageUrl:
+                                              '$_imageBaseUrl${_searchData!['poster_path']}',
+                                          height: 250,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _searchData!['name'] ?? 'Unknown Title',
-                                  style: const TextStyle(
-                                    color: AppColors.primaryText,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _searchData!['overview'] ??
-                                      'No overview available',
-                                  style: const TextStyle(
-                                    color: AppColors.secondaryText,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star,
-                                        color: Colors.amber, size: 18),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${(_searchData!['vote_average'] ?? 0.0).toStringAsFixed(1)}/10',
-                                      style: const TextStyle(
-                                        color: AppColors.primaryText,
-                                        fontSize: 14,
-                                      ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _searchData!['name'] ?? 'Unknown Title',
+                                    style: const TextStyle(
+                                      color: AppColors.primaryText,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(width: 16),
-                                    Icon(Icons.calendar_today,
-                                        color: AppColors.secondaryText,
-                                        size: 16),
-                                    const SizedBox(width: 4),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _searchData!['overview'] ??
+                                        'No overview available',
+                                    style: const TextStyle(
+                                      color: AppColors.secondaryText,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star,
+                                          color: Colors.amber, size: 18),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${(_searchData!['vote_average'] ?? 0.0).toStringAsFixed(1)}/10',
+                                        style: const TextStyle(
+                                          color: AppColors.primaryText,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Icon(Icons.calendar_today,
+                                          color: AppColors.secondaryText,
+                                          size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _searchData!['first_air_date'] ??
+                                            'Unknown',
+                                        style: const TextStyle(
+                                          color: AppColors.secondaryText,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (_searchData!['number_of_seasons'] !=
+                                      null) ...[
+                                    const SizedBox(height: 8),
                                     Text(
-                                      _searchData!['first_air_date'] ??
-                                          'Unknown',
+                                      'Seasons: ${_searchData!['number_of_seasons']}',
                                       style: const TextStyle(
                                         color: AppColors.secondaryText,
                                         fontSize: 14,
                                       ),
                                     ),
                                   ],
-                                ),
-                                if (_searchData!['number_of_seasons'] !=
-                                    null) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Seasons: ${_searchData!['number_of_seasons']}',
-                                    style: const TextStyle(
-                                      color: AppColors.secondaryText,
-                                      fontSize: 14,
-                                    ),
-                                  ),
                                 ],
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        if (!_isMovie) ...[
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _seasonController,
-                                  style: const TextStyle(
-                                      color: AppColors.primaryText),
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Season Number',
-                                    labelStyle: TextStyle(
-                                        color: AppColors.secondaryText),
-                                    border: OutlineInputBorder(),
+                          if (!_isMovie) ...[
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _seasonController,
+                                    style: const TextStyle(
+                                        color: AppColors.primaryText),
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Season Number',
+                                      labelStyle: TextStyle(
+                                          color: AppColors.secondaryText),
+                                      border: OutlineInputBorder(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton.icon(
-                                onPressed: _fetchSeasonEpisodes,
-                                icon: const Icon(Icons.download),
-                                label: const Text('Fetch Episodes'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 16),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Episodes',
-                                style: TextStyle(
-                                  color: AppColors.primaryText,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: _addNewEpisode,
-                                icon: const Icon(Icons.add),
-                                label: const Text('Add Episode'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          ..._episodes.map((episode) => Card(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                color: AppColors.secondaryBackground,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Episode ${episode.episodeNumber}',
-                                        style: const TextStyle(
-                                          color: AppColors.primaryText,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextField(
-                                        onChanged: (value) =>
-                                            episode.link1080p = value,
-                                        style: const TextStyle(
-                                            color: AppColors.primaryText),
-                                        decoration: const InputDecoration(
-                                          labelText: '1080p Link',
-                                          labelStyle: TextStyle(
-                                              color: AppColors.secondaryText),
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        onChanged: (value) =>
-                                            episode.link720p = value,
-                                        style: const TextStyle(
-                                            color: AppColors.primaryText),
-                                        decoration: const InputDecoration(
-                                          labelText: '720p Link',
-                                          labelStyle: TextStyle(
-                                              color: AppColors.secondaryText),
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        onChanged: (value) =>
-                                            episode.link480p = value,
-                                        style: const TextStyle(
-                                            color: AppColors.primaryText),
-                                        decoration: const InputDecoration(
-                                          labelText: '480p Link',
-                                          labelStyle: TextStyle(
-                                              color: AppColors.secondaryText),
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        onChanged: (value) =>
-                                            episode.subtitle = value,
-                                        style: const TextStyle(
-                                            color: AppColors.primaryText),
-                                        decoration: const InputDecoration(
-                                          labelText: 'Subtitle Link (Optional)',
-                                          labelStyle: TextStyle(
-                                              color: AppColors.secondaryText),
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ],
+                                const SizedBox(width: 16),
+                                ElevatedButton.icon(
+                                  onPressed: _fetchSeasonEpisodes,
+                                  icon: const Icon(Icons.download),
+                                  label: const Text('Fetch Episodes'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 16),
                                   ),
                                 ),
-                              )),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Episodes',
+                                  style: TextStyle(
+                                    color: AppColors.primaryText,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                ElevatedButton.icon(
+                                  onPressed: _addNewEpisode,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Episode'),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ..._episodes.map((episode) => Card(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  color: AppColors.secondaryBackground,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Episode ${episode.episodeNumber}',
+                                          style: const TextStyle(
+                                            color: AppColors.primaryText,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              episode.link1080p = value,
+                                          style: const TextStyle(
+                                              color: AppColors.primaryText),
+                                          decoration: const InputDecoration(
+                                            labelText: '1080p Link',
+                                            labelStyle: TextStyle(
+                                                color: AppColors.secondaryText),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              episode.link720p = value,
+                                          style: const TextStyle(
+                                              color: AppColors.primaryText),
+                                          decoration: const InputDecoration(
+                                            labelText: '720p Link',
+                                            labelStyle: TextStyle(
+                                                color: AppColors.secondaryText),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              episode.link480p = value,
+                                          style: const TextStyle(
+                                              color: AppColors.primaryText),
+                                          decoration: const InputDecoration(
+                                            labelText: '480p Link',
+                                            labelStyle: TextStyle(
+                                                color: AppColors.secondaryText),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          onChanged: (value) =>
+                                              episode.subtitle = value,
+                                          style: const TextStyle(
+                                              color: AppColors.primaryText),
+                                          decoration: const InputDecoration(
+                                            labelText:
+                                                'Subtitle Link (Optional)',
+                                            labelStyle: TextStyle(
+                                                color: AppColors.secondaryText),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )),
+                          ],
                         ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
   }
 }

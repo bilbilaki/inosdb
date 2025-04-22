@@ -1,57 +1,38 @@
 // lib/screens/tv_series_grid_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
+import 'package:myapp/models/tv_series.dart';
 import 'package:provider/provider.dart';
-import 'package:myapp/providers/tv_series_provider.dart';
+import 'package:myapp/providers/tv_series_provider.dart'; // Ensure correct provider import
 import 'package:myapp/utils/colors.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:myapp/widgets/tv_series_card.dart';
-import 'package:myapp/utils/dynamic_background.dart';
+import 'package:myapp/utils/dynamic_background.dart'; // Keep if using
 
-class TvSeriesGridScreen extends StatefulWidget {
+// Simplified StateLESS Widget as lazy loading is removed
+class TvSeriesGridScreen extends StatelessWidget {
   const TvSeriesGridScreen({super.key});
 
   @override
-  State<TvSeriesGridScreen> createState() => _TvSeriesGridScreenState();
-}
-
-class _TvSeriesGridScreenState extends State<TvSeriesGridScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final provider = Provider.of<TvSeriesProvider>(context, listen: false);
-      if (provider.hasMoreData && !provider.isLoading) {
-        provider.loadNextBatch();
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Use Consumer directly
     return Consumer<TvSeriesProvider>(
       builder: (context, seriesProvider, child) {
+        // Optional: Keep DynamicBackground if desired
         return DynamicBackground(
           child: _buildBody(context, seriesProvider),
         );
+        // Or just return the body directly:
+        // return _buildBody(context, seriesProvider);
       },
     );
   }
 
   Widget _buildBody(BuildContext context, TvSeriesProvider seriesProvider) {
-    if (seriesProvider.status == LoadingStatus.idle) {
+    final status = seriesProvider.status;
+
+    if (status == LoadingStatus.loading || status == LoadingStatus.idle) {
+      // Show loading indicator initially or while loading
       return const Center(
           child: CircularProgressIndicator(color: AppColors.accentColor));
     }
@@ -70,7 +51,8 @@ class _TvSeriesGridScreenState extends State<TvSeriesGridScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () => seriesProvider.loadNextBatch(),
+            // Reload all data on retry
+            onPressed: () => seriesProvider.loadTvSeriesData(),
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accentColor),
             child: const Text('Retry',
@@ -80,7 +62,8 @@ class _TvSeriesGridScreenState extends State<TvSeriesGridScreen> {
       ));
     }
 
-    final seriesList = seriesProvider.searchResults;
+    // Get the list to display (handles search results automatically)
+    final seriesList = seriesProvider.seriesForDisplay;
 
     if (seriesList.isEmpty && seriesProvider.searchQuery.isNotEmpty) {
       return Center(
@@ -91,28 +74,26 @@ class _TvSeriesGridScreenState extends State<TvSeriesGridScreen> {
 
     if (seriesList.isEmpty) {
       return const Center(
-          child: Text('No TV Series found.',
+          child: Text('No TV Series found in the database.',
               style: TextStyle(color: AppColors.secondaryText)));
     }
 
+    // Display the grid using the loaded list
     return MasonryGridView.count(
-      controller: _scrollController,
+      // No ScrollController needed for lazy loading anymore
       padding: const EdgeInsets.all(8.0),
-      crossAxisCount: 3,
+      crossAxisCount: 3, // Adjust as needed
       mainAxisSpacing: 8.0,
       crossAxisSpacing: 8.0,
-      itemCount: seriesList.length + (seriesProvider.hasMoreData ? 1 : 0),
+      itemCount: seriesList.length, // Directly use the list length
       itemBuilder: (context, index) {
-        if (index == seriesList.length) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(color: AppColors.accentColor),
-            ),
-          );
-        }
         final series = seriesList[index];
-        return TvSeriesCard(series: series);
+        return Tilt(
+            borderRadius: BorderRadius.circular(12),
+            tiltConfig: const TiltConfig(
+              angle: 15,
+            ),
+            child: TvSeriesCard(series: series));
       },
     );
   }

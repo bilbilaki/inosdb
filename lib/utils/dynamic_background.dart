@@ -26,11 +26,9 @@ class DynamicBackground extends StatelessWidget {
           height: size.height,
           width: size.width,
           numberOfParticles: config.numberOfParticles,
-          speedOfParticles: config.speedOfParticles,
           particleColor: config.particleColor,
           isRandomColor: config.isRandomColor,
           randColorList: config.randColorList,
-          maxParticleSize: config.maxParticleSize,
           isRandSize: config.isRandSize,
           onTapAnimation: config.onTapAnimation,
           enableHover: config.enableHover,
@@ -56,7 +54,6 @@ class DynamicBackground extends StatelessWidget {
       case ParticlesTheme.blue:
         return ParticlesConfig(
           numberOfParticles: 100,
-          speedOfParticles: 1.5,
           particleColor: Colors.blueAccent,
           isRandomColor: true,
           randColorList: const [
@@ -66,7 +63,6 @@ class DynamicBackground extends StatelessWidget {
             Colors.lightBlueAccent,
             Colors.indigoAccent,
           ],
-          maxParticleSize: 4,
           isRandSize: true,
           onTapAnimation: true,
           enableHover: true,
@@ -78,7 +74,6 @@ class DynamicBackground extends StatelessWidget {
       case ParticlesTheme.dark:
         return ParticlesConfig(
           numberOfParticles: 200,
-          speedOfParticles: 0.75,
           particleColor: Colors.purpleAccent,
           isRandomColor: true,
           randColorList: const [
@@ -86,7 +81,6 @@ class DynamicBackground extends StatelessWidget {
             Colors.grey,
             Colors.blueGrey,
           ],
-          maxParticleSize: 3,
           isRandSize: true,
           onTapAnimation: true,
           enableHover: true,
@@ -98,7 +92,6 @@ class DynamicBackground extends StatelessWidget {
       case ParticlesTheme.colorful:
         return ParticlesConfig(
           numberOfParticles: 120,
-          speedOfParticles: 2.0,
           isRandomColor: true,
           randColorList: const [
             Colors.red,
@@ -108,7 +101,6 @@ class DynamicBackground extends StatelessWidget {
             Colors.orange,
             Colors.purple,
           ],
-          maxParticleSize: 5,
           isRandSize: true,
           onTapAnimation: true,
           enableHover: true,
@@ -120,7 +112,6 @@ class DynamicBackground extends StatelessWidget {
       case ParticlesTheme.purple:
         return ParticlesConfig(
           numberOfParticles: 90,
-          speedOfParticles: 1.7,
           particleColor: Colors.purpleAccent,
           isRandomColor: true,
           randColorList: const [
@@ -130,7 +121,6 @@ class DynamicBackground extends StatelessWidget {
             Colors.deepPurpleAccent,
             Colors.pinkAccent,
           ],
-          maxParticleSize: 4,
           isRandSize: true,
           onTapAnimation: true,
           enableHover: true,
@@ -143,7 +133,6 @@ class DynamicBackground extends StatelessWidget {
         // Default values, to be overridden by developer
         return ParticlesConfig(
           numberOfParticles: 100,
-          speedOfParticles: 2.0,
           particleColor: Colors.white,
           isRandomColor: false,
         );
@@ -163,11 +152,9 @@ enum ParticlesTheme {
 // Configuration class for particles
 class ParticlesConfig {
   final double numberOfParticles;
-  final double speedOfParticles;
   final Color particleColor;
   final bool isRandomColor;
   final List<Color> randColorList;
-  final double maxParticleSize;
   final bool isRandSize;
   final bool onTapAnimation;
   final bool enableHover;
@@ -182,21 +169,19 @@ class ParticlesConfig {
 
   ParticlesConfig({
     this.numberOfParticles = 100,
-    this.speedOfParticles = 2.0,
     this.particleColor = Colors.purple,
     this.isRandomColor = false,
     this.randColorList = const [Colors.orange, Colors.blue, Colors.teal, Colors.red, Colors.purple],
-    this.maxParticleSize = 4.0,
-    this.isRandSize = false,
+    this.isRandSize = true,
     this.onTapAnimation = true,
     this.enableHover = false,
     this.hoverColor = Colors.orangeAccent,
     this.hoverRadius = 80.0,
-    this.connectDots = false,
+    this.connectDots = true,
     this.lineColor = const Color.fromARGB(90, 155, 39, 176),
     this.lineStrokeWidth = 0.5,
     this.awayRadius = 200.0,
-    this.awayAnimationDuration = const Duration(milliseconds: 100),
+    this.awayAnimationDuration = const Duration(microseconds: 500),
     this.awayAnimationCurve = Curves.easeIn,
   });
 }
@@ -206,7 +191,6 @@ class DynamicBackgroundBuilder {
   static DynamicBackground custom({
     required Widget child,
     double? numberOfParticles,
-    double? speedOfParticles,
     Color? particleColor,
     bool? isRandomColor,
     List<Color>? randColorList,
@@ -240,11 +224,9 @@ class DynamicBackgroundBuilder {
                   height: size.height,
                   width: size.width,
                   numberOfParticles: numberOfParticles ?? baseConfig.numberOfParticles,
-                  speedOfParticles: speedOfParticles ?? baseConfig.speedOfParticles,
                   particleColor: particleColor ?? baseConfig.particleColor,
                   isRandomColor: isRandomColor ?? baseConfig.isRandomColor,
                   randColorList: randColorList ?? baseConfig.randColorList,
-                  maxParticleSize: maxParticleSize ?? baseConfig.maxParticleSize,
                   isRandSize: isRandSize ?? baseConfig.isRandSize,
                   onTapAnimation: onTapAnimation ?? baseConfig.onTapAnimation,
                   enableHover: enableHover ?? baseConfig.enableHover,

@@ -1,5 +1,6 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tilt/flutter_tilt.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/providers/movie_provider.dart';
 import 'package:myapp/utils/colors.dart';
@@ -90,7 +91,12 @@ class HomeScreen extends StatelessWidget {
       itemCount: movieProvider.movies.length,
       itemBuilder: (context, index) {
         final movie = movieProvider.movies[index];
-        return MovieCard(movie: movie);
+        return Tilt(
+            borderRadius: BorderRadius.circular(12),
+            tiltConfig: const TiltConfig(
+              angle: 15,
+            ),
+            child: MovieCard(movie: movie));
       },
     );
 

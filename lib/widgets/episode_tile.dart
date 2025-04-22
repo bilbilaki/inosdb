@@ -5,71 +5,92 @@ import 'package:myapp/screens/video_player_screen.dart'; // Your player screen
 import 'package:myapp/utils/colors.dart';
 
 class EpisodeTile extends StatelessWidget {
- final Episode episode;
+  final Episode episode;
 
- const EpisodeTile({required this.episode, super.key});
+  const EpisodeTile({required this.episode, super.key});
 
- void _playVideo(BuildContext context, String url) {
- Navigator.push(
- context,
- MaterialPageRoute(
- builder: (_) => VideoPlayerScreen(videoUrl: url),
- ),
- );
- }
+  void _playVideo(BuildContext context, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VideoPlayerScreen(videoUrl: url),
+      ),
+    );
+  }
 
- @override
- Widget build(BuildContext context) {
- final availableQualities = episode.getAvailableQualityUrls();
+  @override
+  Widget build(BuildContext context) {
+    final availableQualities = episode.getAvailableQualityUrls();
 
- return Card(
- color: AppColors.secondaryBackground.withOpacity(0.6),
- margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
- child: Padding(
- padding: const EdgeInsets.all(12.0),
- child: Row(
- children: [
- // Episode Number/Identifier
- Expanded(
- flex: 2, // Give more space to title/identifier
- child: Text(
- // Prioritize TMDB title if available in future, else use identifier
- episode.tmdbTitle ?? episode.episodeIdentifier,
- style: const TextStyle(color: AppColors.primaryText, fontSize: 15),
- overflow: TextOverflow.ellipsis,
- ),
- ),
- const SizedBox(width: 10),
+    // Create a display title: "E01: Episode Name" or just "Episode 1" if no name
+    // Since we removed tmdbTitle, we'll rely on season/episode numbers.
+    final displayTitle = 'Episode ${episode.episodeNumber}'; // Simple display
+    // Or use the identifier: final displayTitle = episode.episodeIdentifier;
 
- // Quality Buttons
- Expanded(
- flex: 3, // Give space for buttons
- child: Wrap(
- alignment: WrapAlignment.end, // Align buttons to the right
- spacing: 6.0, // Horizontal space between buttons
- runSpacing: 4.0, // Vertical space if wraps
- children: availableQualities.entries.map((entry) {
- final quality = entry.key;
- final url = entry.value;
- return ElevatedButton(
- onPressed: () => _playVideo(context, url),
- style: ElevatedButton.styleFrom(
- backgroundColor: AppColors.accentColor.withOpacity(0.8),
- padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
- minimumSize: const Size(40, 30), // Smaller buttons
- textStyle: const TextStyle(fontSize: 12),
- shape: RoundedRectangleBorder(
- borderRadius: BorderRadius.circular(6),
- ),
- ),
- child: Text(quality, style: const TextStyle(color: AppColors.primaryText)),
- );
- }).toList(),
- ),
- ),
- ],
- ),
- ),
- );
- }
+    return Padding( // Add padding instead of using Card margin for better control with dividers
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // Adjust padding as needed
+      child: Row(
+        children: [
+          // Episode Number/Identifier
+          Expanded(
+            flex: 3, // Give reasonable space to title/identifier
+            child: Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                  Text(
+                    displayTitle, // Use the generated display title
+                    style: const TextStyle(color: AppColors.primaryText, fontSize: 14, fontWeight: FontWeight.w500),
+                    maxLines: 2, // Allow wrapping
+                    overflow: TextOverflow.ellipsis,
+                 ),
+                 // Optionally show the SxxExx identifier below if different
+                 if(episode.episodeIdentifier != displayTitle)
+                     Text(
+                         episode.episodeIdentifier,
+                         style: const TextStyle(color: AppColors.secondaryText, fontSize: 11),
+                      ),
+               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Quality Buttons
+          if (availableQualities.isNotEmpty)
+             Expanded(
+               flex: 4, // Give slightly more space for buttons maybe
+               child: Wrap(
+                 alignment: WrapAlignment.end, // Align buttons to the right
+                 spacing: 6.0, // Horizontal space between buttons
+                 runSpacing: 4.0, // Vertical space if wraps
+                 children: availableQualities.entries.map((entry) {
+                   final quality = entry.key;
+                   final url = entry.value;
+                   return ElevatedButton(
+                     onPressed: () => _playVideo(context, url),
+                     style: ElevatedButton.styleFrom(
+                       backgroundColor: AppColors.accentColor.withOpacity(0.7), // Button color
+                       foregroundColor: AppColors.primaryText,                  // Text color
+                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), // Adjusted padding
+                       minimumSize: const Size(45, 28), // Ensure minimum size
+                       textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold), // Adjust font
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(6),
+                       ),
+                       elevation: 1, // Slight elevation
+                      ),
+                     child: Text(quality.toUpperCase()), // Uppercase quality (e.g., 1080P)
+                   );
+                 }).toList(),
+              ),
+            )
+          else
+            // Show something if no qualities are found for this episode
+             const Text(
+               'No links',
+               style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontStyle: FontStyle.italic),
+             ),
+        ],
+      ),
+    );
+  }
 }

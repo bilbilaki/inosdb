@@ -1,5 +1,16 @@
 // lib/models/movie.dart
 import 'package:flutter/foundation.dart'; // For kDebugMode
+import 'package:url_launcher/url_launcher.dart'; 
+
+class VideoInfo {
+  final String title;
+  final String key; // YouTube key
+  final String type; // e.g., "Trailer", "Opening", "Clip"
+
+  VideoInfo({required this.title, required this.key, required this.type});
+}
+
+
 
 class Movie {
   final int id;
@@ -28,8 +39,9 @@ class Movie {
   final List<String> keywords;
   final String? source; // Make nullable
   final String? rawDownloadLinks; // Store the raw string
+  final String? rawVideos;
 
-  static const String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
+  static const String imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
 
   Movie({
     required this.id,
@@ -58,10 +70,12 @@ class Movie {
     required this.keywords,
     this.source,
     this.rawDownloadLinks,
+       this.rawVideos, // Make sure it's included
   });
 
   String? getPosterUrl() {
-    if (posterPath == null || posterPath!.isEmpty || posterPath == "nan") return null;
+    if (posterPath == null || posterPath!.isEmpty || posterPath == "nan")
+      return null;
     // Handle potential leading slash if it's not already there in the base URL or path
     final path = posterPath!.startsWith('/') ? posterPath! : '/$posterPath';
     return imageBaseUrl + path;
@@ -69,9 +83,11 @@ class Movie {
 
   String? getBackdropUrl() {
     // Use w780 or original for backdrops for better quality
-    const String backdropBaseUrl = 'https://image.tmdb.org/t/p/w780';
-    if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan") return null;
-    final path = backdropPath!.startsWith('/') ? backdropPath! : '/$backdropPath';
+    const String backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780';
+    if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan")
+      return null;
+    final path =
+        backdropPath!.startsWith('/') ? backdropPath! : '/$backdropPath';
     return backdropBaseUrl + path;
   }
 
@@ -88,12 +104,13 @@ class Movie {
         .toList();
   }
 
-
   // Factory constructor to create a Movie from a CSV row (List<dynamic>)
   factory Movie.fromCsvRow(List<dynamic> row) {
     // Helper function for safe parsing
     T? tryParse<T>(dynamic value, T Function(String) parser) {
-      if (value == null || value.toString().isEmpty || value.toString().toLowerCase() == 'nan') {
+      if (value == null ||
+          value.toString().isEmpty ||
+          value.toString().toLowerCase() == 'nan') {
         return null;
       }
       try {
@@ -113,12 +130,18 @@ class Movie {
 
     // Helper to split potentially complex string fields (like genres)
     List<String> splitStringList(dynamic value) {
-        if (value == null || value.toString().isEmpty || value.toString().toLowerCase() == 'nan') return [];
-        // Handles simple comma separation, might need adjustment
-        // if format is more complex (e.g., JSON string within CSV)
-        return value.toString().split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      if (value == null ||
+          value.toString().isEmpty ||
+          value.toString().toLowerCase() == 'nan') return [];
+      // Handles simple comma separation, might need adjustment
+      // if format is more complex (e.g., JSON string within CSV)
+      return value
+          .toString()
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
     }
-
 
     return Movie(
       id: tryParseInt(row[0]) ?? 0, // Default to 0 if parsing fails
@@ -150,4 +173,114 @@ class Movie {
       rawDownloadLinks: row[25]?.toString(), // Store the raw string
     );
   }
+  List<VideoInfo> parseVideoData() {
+   final List<VideoInfo> results = [];
+   if (rawVideos == null || rawVideos!.trim().isEmpty || rawVideos!.toLowerCase() == 'nan') {
+     return results;
+   }
+
+   // Example format: "Trailer: KEY1 | Opening Credits: KEY2 | Clip Name: KEY3"
+   final entries = rawVideos!.split('|'); // Split entries by '|'
+
+   for (String entry in entries) {
+     entry = entry.trim();
+     if (entry.isEmpty) continue;
+
+     final parts = entry.split(':'); // Split title and key by ':'
+     if (parts.length >= 2) {
+       String title = parts[0].trim();
+       String key = parts.sublist(1).join(':').trim(); // Join back in case title had ':'
+       String type = "Clip"; // Default type
+
+       // Basic type detection from title (customize as needed)
+       if (title.toLowerCase().contains('trailer')) type = "Trailer";
+       if (title.toLowerCase().contains('teaser')) type = "Teaser";
+       if (title.toLowerCase().contains('opening')) type = "Opening";
+       if (title.toLowerCase().contains('ending')) type = "Ending";
+
+       if (key.isNotEmpty) { // Ensure key is not empty
+         results.add(VideoInfo(title: title, key: key, type: type));
+       }
+     } else {
+       // Maybe handle entries without ':' (e.g., just a key?)
+       if (kDebugMode) print("Could not parse video entry: $entry");
+     }
+   }
+   return results;
+ }
+
+
+  // Convert Movie object to Map for database storage
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id.toString(),
+      'title': title,
+      'release_date': releaseDate?.toIso8601String(),
+      'overview': overview,
+      'poster_path': posterPath,
+      'backdrop_path': backdropPath,
+      'vote_average': voteAverage,
+      'vote_count': voteCount,
+      'popularity': popularity,
+      'genre_ids': genres.join(','),
+      'original_language': originalLanguage,
+      'video': false, // Default value since not in model
+      'adult': adult ? 1 : 0, // SQLite doesn't have boolean type
+    };
+  }
+
+  // Create Movie object from database Map
+  factory Movie.fromMap(Map<String, dynamic> map) {
+    return Movie(
+      id: int.parse(map['id']),
+      title: map['title'],
+      voteAverage: map['vote_average'],
+      voteCount: map['vote_count'],
+      status: 'Released', // Default value since not in database
+      releaseDate: map['release_date'] != null
+          ? DateTime.parse(map['release_date'])
+          : null,
+      revenue: 0, // Default value since not in database
+      runtime: null, // Default value since not in database
+      adult: map['adult'] == 1,
+      backdropPath: map['backdrop_path'],
+      budget: 0, // Default value since not in database
+      homepage: null, // Default value since not in database
+      imdbId: null, // Default value since not in database
+      originalLanguage: map['original_language'],
+      originalTitle: map['title'], // Using title as fallback
+      overview: map['overview'],
+      popularity: map['popularity'],
+      posterPath: map['poster_path'],
+      tagline: null, // Default value since not in database
+      genres: map['genre_ids']?.toString().split(',') ?? [],
+      productionCompanies: [], // Default value since not in database
+      productionCountries: [], // Default value since not in database
+      spokenLanguages: [], // Default value since not in database
+      keywords: [], // Default value since not in database
+      source: null, // Default value since not in database
+      rawDownloadLinks: null, // Default value since not in database
+    );
+  }
 }
+Future<void> launchVideo(String key) async {
+   final Uri youtubeUrl = Uri.parse('https://www.youtube.com/watch?v=$key');
+    final Uri youtubeAppUrl = Uri.parse('youtube://www.youtube.com/watch?v=$key'); // For app intent
+
+   try {
+     // Try opening in app first (might need platform-specific checks or alternative packages for better integration)
+     if (await canLaunchUrl(youtubeAppUrl)) {
+       await launchUrl(youtubeAppUrl, mode: LaunchMode.externalApplication);
+     }
+     // Fallback to web browser
+     else if (await canLaunchUrl(youtubeUrl)) {
+       await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
+     } else {
+         if (kDebugMode) print("Could not launch YouTube URL for key: $key");
+       // Optionally show a message to the user
+     }
+   } catch (e) {
+     if (kDebugMode) print("Error launching url: $e");
+      // Optionally show a message to the user
+   }
+ }

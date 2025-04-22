@@ -36,8 +36,8 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         // Keep YT logo for now or replace
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.network(
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/YouTube_Logo_2017.svg/100px-YouTube_Logo_2017.svg.png',
+          Image.asset(
+            'assets/YouTube.png',
             height: 22,
           ),
         ],
@@ -256,15 +256,15 @@ class TvSeriesSearchDelegate extends SearchDelegate<TvSeries?> {
 
     // Display results using a ListView/GridView similar to HomeScreen
     return Consumer<TvSeriesProvider>(builder: (context, provider, child) {
-      if (provider.searchResults.isEmpty) {
+      if (provider.seriesForDisplay.isEmpty) {
         return Center(
             child: Text('No results found for "$query"',
                 style: const TextStyle(color: AppColors.secondaryText)));
       }
       return ListView.builder(
-        itemCount: provider.searchResults.length,
+        itemCount: provider.seriesForDisplay.length,
         itemBuilder: (context, index) {
-          final series = provider.searchResults[index];
+          final series = provider.seriesForDisplay[index];
           return ListTile(
             leading: series.fullPosterUrl != null
                 ? SizedBox(
@@ -274,7 +274,7 @@ class TvSeriesSearchDelegate extends SearchDelegate<TvSeries?> {
                 : null,
             title: Text(series.name,
                 style: const TextStyle(color: AppColors.primaryText)),
-            subtitle: Text(series.firstAirDate ?? '',
+            subtitle: Text(series.firstAirDate?.toString() ?? '',
                 style: const TextStyle(color: AppColors.secondaryText)),
             onTap: () {
               close(context, series); // Close search and return selected series
