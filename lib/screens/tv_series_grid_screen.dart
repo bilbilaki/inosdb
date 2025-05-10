@@ -1,6 +1,7 @@
 // lib/screens/tv_series_grid_screen.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/tv_series.dart';
+//import 'package:miko/models/tv_series.dart';
 import 'package:miko/services/user_data_service.dart';
 import 'package:provider/provider.dart';
 import 'package:miko/providers/tv_series_provider.dart'; // Ensure correct provider import

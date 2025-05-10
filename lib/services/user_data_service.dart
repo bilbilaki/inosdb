@@ -43,7 +43,7 @@ class UserDataService extends ChangeNotifier {
   bool _useSecondaryPlayer = false;
   String? _externalDownloadManagerPackage;
   String? _externalPlayerPackage;
-
+  bool _areyouwantfarsi = false;
   // Default settings values
   String _externalPlayer = '';
   String _downloadManager = '';
@@ -57,7 +57,7 @@ class UserDataService extends ChangeNotifier {
   bool get useSecondaryPlayer => _useSecondaryPlayer;
   String? get externalDownloadManagerPackage => _externalDownloadManagerPackage;
   String? get externalPlayerPackage => _externalPlayerPackage;
-
+  bool get areyouwantfarsi => _areyouwantfarsi;
   // Getters for settings
   String get externalPlayer => _externalPlayer;
   String get downloadManager => _downloadManager;
@@ -77,6 +77,7 @@ class UserDataService extends ChangeNotifier {
     _watchlistMovieIds = _getIntList(_watchlistMoviesKey);
     _watchlistAnimeIds = _getIntList(_watchlistAnimeKey);
     _watchlistTvSeriesIds = _getIntList(_watchlistTvSeriesKey);
+    
     notifyListeners(); // Notify listeners once prefs are loaded
   }
 
@@ -183,6 +184,7 @@ class UserDataService extends ChangeNotifier {
     await _prefs?.remove('downloadManager');
     await _prefs?.remove('gridSize');
     await _prefs?.remove('decoderPreference');
+    await _prefs?.remove('areyouwantfarsi');
 
     // Reload settings to reset to defaults
     await _loadSettings();
@@ -205,6 +207,7 @@ class UserDataService extends ChangeNotifier {
     // Load Player Settings
     _useHardwareDecoder = _prefs?.getBool('useHardwareDecoder') ?? true;
     _useSecondaryPlayer = _prefs?.getBool('useSecondaryPlayer') ?? false;
+    _areyouwantfarsi = _prefs?.getBool('areyouwantfarsi') ?? false;
 
     // Load External App Packages
     _externalDownloadManagerPackage =
@@ -245,6 +248,12 @@ class UserDataService extends ChangeNotifier {
   Future<void> setUseSecondaryPlayer(bool value) async {
     _useSecondaryPlayer = value;
     await _prefs?.setBool('useSecondaryPlayer', value);
+    notifyListeners();
+  }
+
+  Future<void> setAreuwanfarsi(bool value) async {
+    _areyouwantfarsi = value;
+    await _prefs?.setBool('areyouwantfarsi', value);
     notifyListeners();
   }
 

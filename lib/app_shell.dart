@@ -1,8 +1,6 @@
-// TODO Implement this library.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // Import GoRouter
-import 'package:miko/models/lists_model.dart';
 import 'package:miko/router.dart'; // Import your route definitions
 import 'package:miko/screens/anime_details_screen.dart';
 import 'package:miko/screens/movie_details_screen.dart';
@@ -85,11 +83,13 @@ class DrawerState extends ChangeNotifier {
     final velocity = details.primaryVelocity ?? 0.0;
     bool shouldOpen = _isDrawerOpen;
     if (!_isDrawerOpen) {
-      if (dragDistance > _drawerWidth * 0.4 || velocity > 300)
+      if (dragDistance > _drawerWidth * 0.4 || velocity > 300) {
         shouldOpen = true;
+      }
     } else {
-      if (dragDistance < -_drawerWidth * 0.4 || velocity < -300)
+      if (dragDistance < -_drawerWidth * 0.4 || velocity < -300) {
         shouldOpen = false;
+      }
     }
     shouldOpen ? openDrawer() : closeDrawer();
   }
@@ -108,7 +108,7 @@ class AppShell extends StatelessWidget {
   const AppShell({required this.child, super.key});
 
   // --- Helper function to map current route to BottomNavBar index ---
-  int _calculateSelectedIndex(BuildContext context) {
+  int _calculateSelectedIndex(BuildContext context)  {
     final String location = GoRouterState.of(context).matchedLocation;
 
     // Define the mapping from route path to bottom nav index.
@@ -130,7 +130,7 @@ class AppShell extends StatelessWidget {
   }
 
   // --- Function to handle navigation triggered by BottomNavBar ---
-  void _onItemTapped(int index, BuildContext context) {
+  void _onItemTapped(int index, BuildContext context) async {
     const int addButtonIndex = 4; // The index of the 'Add/Shorts' button
 
     switch (index) {
@@ -147,7 +147,7 @@ class AppShell extends StatelessWidget {
         context.go('/genre_list_screen');
         break;
       case addButtonIndex: // Special case: Push the Shorts screen
-        context.push('/shorts_screen'); // Use context.push to add to stack
+        context.push('/favorites_screen'); // Use context.push to add to stack
         break;
       case 5:
         context.go('/library_screen');
@@ -188,8 +188,10 @@ class AppShell extends StatelessWidget {
                   // Pass a closure that calls _onItemTapped with context
                   onTap: (index) => _onItemTapped(index, context),
                 ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () {
+                floatingActionButton: Align(
+  alignment: Alignment.bottomLeft, // This is the key flip
+  child: FloatingActionButton(
+                  onPressed: () async {
                     final routerState = GoRouterState.of(context);
                     final currentPath = routerState.uri.path;
                     late TvSeriesProvider tvSeriesProvider;
@@ -282,10 +284,10 @@ class AppShell extends StatelessWidget {
                       // If the randomly selected category has no items, nothing happens
                     }
 // ... existing code ...
-                  },
-                  child: const Icon(Icons.shuffle), // Icon for random selection
-                  tooltip: 'Play Random', // Tooltip text
-                ),
+                  }, // Icon for random selection
+                  tooltip: 'Play Random',
+                  child: const Icon(Icons.shuffle), // Tooltip text
+                  )  ),
               ),
 
               // --- Dark Overlay (No changes needed) ---

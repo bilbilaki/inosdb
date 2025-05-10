@@ -9,8 +9,6 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'package:miko/services/user_data_service.dart';
 //import 'package:myapp/screens/settings_screen.dart';
 import 'package:provider/provider.dart'; // For accessing UserDataService
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 
 class AnimeSeriesCard extends StatelessWidget {
   final TvSeriesAnime series;

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:miko/models/episode_anime.dart';
 import 'package:miko/screens/video_player_screen.dart'; // Your player screen
 import 'package:miko/utils/colors.dart';
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 
 class AnimeEpisodeTile extends StatelessWidget {
   final EpisodeAnime episode;
@@ -14,7 +12,11 @@ class AnimeEpisodeTile extends StatelessWidget {
   void _playVideo(BuildContext context, String url) {
     // URL encode the video URL to make it safe for use in the path
     final encodedUrl = Uri.encodeComponent(url);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPlayerScreen(videoUrl: url)));
+       Navigator.push(
+       context,
+    MaterialPageRoute(
+      builder: (_) => VideoPlayerScreen(videoUrl: url), // Pass movie ID
+       ));
   }
 
   @override

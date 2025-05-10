@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:miko/providers/anime_provider.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
-import 'package:miko/router.dart';
 import 'package:miko/screens/genre_detail_screen.dart'; // Will create this next
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 
 class GenreListScreen extends StatelessWidget {

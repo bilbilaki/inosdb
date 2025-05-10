@@ -1,0 +1,1 @@
+C:\Users\inos\android-apps\miko\build\app\intermediates\cxx\RelWithDebInfo\2c6i4h1n\obj\arm64-v8a

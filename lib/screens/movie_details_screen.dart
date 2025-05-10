@@ -1,6 +1,7 @@
 // lib/screens/movie_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:miko/models/movie.dart'; // Import VideoInfo
+import 'package:miko/showcases/movie_page.dart';
 // Import UserDataService
 import 'package:provider/provider.dart';
 import 'package:miko/providers/movie_provider.dart';
@@ -9,8 +10,8 @@ import 'package:miko/utils/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 //import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:go_router/go_router.dart';
-import 'package:miko/router.dart';
+import '../showcases/movie_detail_page.dart';
+
 import 'package:miko/services/user_data_service.dart'; // Import UserDataService
 
 class MovieDetailsScreen extends StatelessWidget {
@@ -451,13 +452,13 @@ class MovieDetailsScreen extends StatelessWidget {
                 Navigator.pop(dialogContext); // Close the dialog
                 // Navigate to the Video Player Screen
                  final encodedUrl = Uri.encodeComponent(link);
-    context.go('/video/$encodedUrl');
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (_) => VideoPlayerScreen(videoUrl: link),
-                //   ),
-                // );
+    
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                     builder: (_) => VideoPlayerScreen(videoUrl: link),
+                   ),
+                 );
               },
               padding:
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),

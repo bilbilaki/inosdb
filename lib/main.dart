@@ -9,24 +9,35 @@ import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:media_kit/media_kit.dart';
 import 'router.dart';
+import 'package:tmdb_flutter/tmdb_flutter.dart';
+import 'constants.dart' as c;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   await MediaCacheManager.instance.init();
   // Hive.registerAdapter(MovieAdapter()); // Remove or comment out if this was for the old model
-
+  TmdbFlutter.init(apiKey: c.AppConstants.tmdbapikey);
   // Initialize Hive and register adapters
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => DrawerState()),
-        ChangeNotifierProvider(create: (context) => AnimeProvider()), // Initialize AnimeProvider directly
-        ChangeNotifierProvider(create: (context) => MovieProvider()), // Initialize MovieProvider directly
+        ChangeNotifierProvider(
+            create: (context) =>
+                AnimeProvider()), // Initialize AnimeProvider directly
+        ChangeNotifierProvider(
+            create: (context) =>
+                MovieProvider()), // Initialize MovieProvider directly
         ChangeNotifierProvider(create: (context) => TvSeriesProvider()),
+
         ChangeNotifierProvider(
             create: (context) => UserDataService()), // Add UserDataService
+
+          ChangeNotifierProvider(create: (_) => SearchProvider()),
+    ChangeNotifierProvider(create: (_) => TitleDetailsProvider()),
+
       ],
       child: const MyApp(), // Use const if MyApp is stateless
     ),
@@ -43,7 +54,7 @@ class MyApp extends StatelessWidget {
         create: (context) => DrawerState(),
         child: MaterialApp.router(
           title: 'Miko',
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.darkTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.system, // Follows system theme
           debugShowCheckedModeBanner: false,

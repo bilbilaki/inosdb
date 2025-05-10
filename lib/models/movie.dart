@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart'; // For kDebugMode
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:tmdb_flutter/tmdb_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../constants.dart' as c;
 
 class VideoInfo {
   final String title;
@@ -8,8 +10,6 @@ class VideoInfo {
 
   VideoInfo({required this.title, required this.key, required this.type});
 }
-
-
 
 class Movie {
   final int id;
@@ -40,7 +40,8 @@ class Movie {
   final String? rawDownloadLinks; // Store the raw string
   final String? rawVideos;
 
-  static const String imageBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w500';
+  static const String imageBaseUrl =
+      'https://inosdb.worker-inosuke.workers.dev/w500';
 
   Movie({
     required this.id,
@@ -69,7 +70,7 @@ class Movie {
     required this.keywords,
     this.source,
     this.rawDownloadLinks,
-       this.rawVideos, // Make sure it's included
+    this.rawVideos, // Make sure it's included
   });
 
   String? getPosterUrl() {
@@ -83,8 +84,11 @@ class Movie {
 
   String? getBackdropUrl() {
     // Use w780 or original for backdrops for better quality
-    const String backdropBaseUrl = 'https://inosdb.worker-inosuke.workers.dev/w780';
-    if (backdropPath == null || backdropPath!.isEmpty || backdropPath == "nan") {
+    const String backdropBaseUrl =
+        'https://inosdb.worker-inosuke.workers.dev/w780';
+    if (backdropPath == null ||
+        backdropPath!.isEmpty ||
+        backdropPath == "nan") {
       return null;
     }
     final path =
@@ -177,41 +181,46 @@ class Movie {
     );
   }
   List<VideoInfo> parseVideoData() {
-   final List<VideoInfo> results = [];
-   if (rawVideos == null || rawVideos!.trim().isEmpty || rawVideos!.toLowerCase() == 'nan') {
-     return results;
-   }
+    final List<VideoInfo> results = [];
+    if (rawVideos == null ||
+        rawVideos!.trim().isEmpty ||
+        rawVideos!.toLowerCase() == 'nan') {
+      return results;
+    }
 
-   // Example format: "Trailer: KEY1 | Opening Credits: KEY2 | Clip Name: KEY3"
-   final entries = rawVideos!.split('|'); // Split entries by '|'
+    // Example format: "Trailer: KEY1 | Opening Credits: KEY2 | Clip Name: KEY3"
+    final entries = rawVideos!.split('|'); // Split entries by '|'
 
-   for (String entry in entries) {
-     entry = entry.trim();
-     if (entry.isEmpty) continue;
+    for (String entry in entries) {
+      entry = entry.trim();
+      if (entry.isEmpty) continue;
 
-     final parts = entry.split(':'); // Split title and key by ':'
-     if (parts.length >= 2) {
-       String title = parts[0].trim();
-       String key = parts.sublist(1).join(':').trim(); // Join back in case title had ':'
-       String type = "Clip"; // Default type
+      final parts = entry.split(':'); // Split title and key by ':'
+      if (parts.length >= 2) {
+        String title = parts[0].trim();
+        String key = parts
+            .sublist(1)
+            .join(':')
+            .trim(); // Join back in case title had ':'
+        String type = "Clip"; // Default type
 
-       // Basic type detection from title (customize as needed)
-       if (title.toLowerCase().contains('trailer')) type = "Trailer";
-       if (title.toLowerCase().contains('teaser')) type = "Teaser";
-       if (title.toLowerCase().contains('opening')) type = "Opening";
-       if (title.toLowerCase().contains('ending')) type = "Ending";
+        // Basic type detection from title (customize as needed)
+        if (title.toLowerCase().contains('trailer')) type = "Trailer";
+        if (title.toLowerCase().contains('teaser')) type = "Teaser";
+        if (title.toLowerCase().contains('opening')) type = "Opening";
+        if (title.toLowerCase().contains('ending')) type = "Ending";
 
-       if (key.isNotEmpty) { // Ensure key is not empty
-         results.add(VideoInfo(title: title, key: key, type: type));
-       }
-     } else {
-       // Maybe handle entries without ':' (e.g., just a key?)
-       if (kDebugMode) print("Could not parse video entry: $entry");
-     }
-   }
-   return results;
- }
-
+        if (key.isNotEmpty) {
+          // Ensure key is not empty
+          results.add(VideoInfo(title: title, key: key, type: type));
+        }
+      } else {
+        // Maybe handle entries without ':' (e.g., just a key?)
+        if (kDebugMode) print("Could not parse video entry: $entry");
+      }
+    }
+    return results;
+  }
 
   // Convert Movie object to Map for database storage
   Map<String, dynamic> toMap() {
@@ -239,51 +248,140 @@ class Movie {
       title: map['title'],
       voteAverage: map['vote_average'],
       voteCount: map['vote_count'],
-      status: 'Released', // Default value since not in database
+      status: map['status'], // Default value since not in database
       releaseDate: map['release_date'] != null
           ? DateTime.parse(map['release_date'])
           : null,
       revenue: 0, // Default value since not in database
-      runtime: null, // Default value since not in database
+      runtime: map['runtime'], // Default value since not in database
       adult: map['adult'] == 1,
       backdropPath: map['backdrop_path'],
-      budget: 0, // Default value since not in database
-      homepage: null, // Default value since not in database
-      imdbId: null, // Default value since not in database
+      budget: map['budget'], // Default value since not in database
+      homepage: map['homepage'], // Default value since not in database
+      imdbId: map['imdb_id'], // Default value since not in database
       originalLanguage: map['original_language'],
       originalTitle: map['title'], // Using title as fallback
       overview: map['overview'],
       popularity: map['popularity'],
       posterPath: map['poster_path'],
       tagline: null, // Default value since not in database
-      genres: map['genre_ids']?.toString().split(',') ?? [],
+      genres: map['genres']?.toString().split(',') ?? [],
       productionCompanies: [], // Default value since not in database
       productionCountries: [], // Default value since not in database
       spokenLanguages: [], // Default value since not in database
-      keywords: [], // Default value since not in database
+      keywords: map['keywords'], // Default value since not in database
       source: null, // Default value since not in database
       rawDownloadLinks: null, // Default value since not in database
     );
   }
 }
-Future<void> launchVideo(String key) async {
-   final Uri youtubeUrl = Uri.parse('https://www.youtube.com/watch?v=$key');
-    final Uri youtubeAppUrl = Uri.parse('youtube://www.youtube.com/watch?v=$key'); // For app intent
 
-   try {
-     // Try opening in app first (might need platform-specific checks or alternative packages for better integration)
-     if (await canLaunchUrl(youtubeAppUrl)) {
-       await launchUrl(youtubeAppUrl, mode: LaunchMode.externalApplication);
-     }
-     // Fallback to web browser
-     else if (await canLaunchUrl(youtubeUrl)) {
-       await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
-     } else {
-         if (kDebugMode) print("Could not launch YouTube URL for key: $key");
-       // Optionally show a message to the user
-     }
-   } catch (e) {
-     if (kDebugMode) print("Error launching url: $e");
+Future<void> launchVideo(String key) async {
+  final Uri youtubeUrl = Uri.parse('https://www.youtube.com/watch?v=$key');
+  final Uri youtubeAppUrl =
+      Uri.parse('youtube://www.youtube.com/watch?v=$key'); // For app intent
+
+  try {
+    // Try opening in app first (might need platform-specific checks or alternative packages for better integration)
+    if (await canLaunchUrl(youtubeAppUrl)) {
+      await launchUrl(youtubeAppUrl, mode: LaunchMode.externalApplication);
+    }
+    // Fallback to web browser
+    else if (await canLaunchUrl(youtubeUrl)) {
+      await launchUrl(youtubeUrl, mode: LaunchMode.externalApplication);
+    } else {
+      if (kDebugMode) print("Could not launch YouTube URL for key: $key");
       // Optionally show a message to the user
-   }
- }
+    }
+  } catch (e) {
+    if (kDebugMode) print("Error launching url: $e");
+    // Optionally show a message to the user
+  }
+}
+
+class TmdbVideo {
+  final String id;
+  final String key;
+  final String name;
+  final String site;
+  final int size;
+  final String type;
+  final String? iso6391;
+  final String? iso31661;
+  final bool official;
+  final DateTime? publishedAt;
+
+  TmdbVideo({
+    required this.id,
+    required this.key,
+    required this.name,
+    required this.site,
+    required this.size,
+    required this.type,
+    this.iso6391,
+    this.iso31661,
+    this.official = true,
+    this.publishedAt,
+  });
+
+  factory TmdbVideo.fromCsvRow(List<dynamic> row) {
+    // Helper function for safe parsing
+    T? tryParse<T>(dynamic value, T Function(String) parser) {
+      if (value == null ||
+          value.toString().isEmpty ||
+          value.toString().toLowerCase() == 'nan') {
+        return null;
+      }
+      try {
+        return parser(value.toString());
+      } catch (e) {
+        if (kDebugMode) {
+          print("CSV Parsing Error for value '$value': $e");
+        }
+        return null;
+      }
+    }
+
+    int? tryParseInt(dynamic value) => tryParse(value, int.parse);
+    double? tryParseDouble(dynamic value) => tryParse(value, double.parse);
+    DateTime? tryParseDate(dynamic value) => tryParse(value, DateTime.parse);
+    bool parseBool(dynamic value) => value.toString().toUpperCase() == 'TRUE';
+
+    // Helper to split potentially complex string fields (like genres)
+    List<String> splitStringList(dynamic value) {
+      if (value == null ||
+          value.toString().isEmpty ||
+          value.toString().toLowerCase() == 'nan') {
+        return [];
+      }
+      // Handles simple comma separation, might need adjustment
+      // if format is more complex (e.g., JSON string within CSV)
+      return value
+          .toString()
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+
+    return TmdbVideo(
+      id: (row[0]) ?? 0, // Default to 0 if parsing fails
+      name: row[1]?.toString() ?? 'No Title',
+      key: c.AppConstants.tmdbapikey,
+      size: 1080,
+      type: '',
+
+      site: row[11]?.toString() ?? '',
+      official: true,
+    );
+  }
+  List<VideoInfo> parseVideoData() {
+    final List<VideoInfo> results = [];
+
+    return results;
+  }
+
+  // Example format: "Trailer: KEY1 | Opening Credits: KEY2 | Clip Name: KEY3"
+
+  // Basic type detection from title (customize as needed)
+}

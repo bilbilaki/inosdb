@@ -1,18 +1,15 @@
-// TODO Implement this library.
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:miko/app_shell.dart'; // Your AppShell wrapping widget
-import 'package:miko/models/lists_model.dart';
-import 'package:miko/models/tv_series.dart';
 import 'package:miko/screens/anime_details_screen.dart';
 import 'package:miko/screens/home_screen.dart';
 import 'package:miko/screens/movie_details_screen.dart';
+import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_details_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/anime_grid_screen.dart';
 import 'package:miko/screens/genre_list_screen.dart';
 import 'package:miko/screens/library_screen.dart';
-import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/favorites_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
 import 'package:miko/screens/settings_screen.dart';
@@ -23,6 +20,8 @@ import 'package:miko/screens/video_player_screen.dart';
 //import 'package:miko/screens/search_screen_tv.dart';
 //import 'package:miko/screens/search_screen_anime.dart';
 import 'package:miko/screens/unisearch_screen.dart';
+import 'showcases/movie_page.dart';
+import 'package:miko/showcases/tv_page.dart';
 
 // Use a GlobalKey for the ShellRoute Navigator
 // This allows routing *within* the shell (like pushing details pages later)
@@ -58,6 +57,9 @@ class AppRoutes {
   static const searchtv = '/searchtv';
   static const searchanime = '/searchanime';
   static const unifiedSearch = '/unifiedsearch';
+  static const showcasesmovie = '/showcasesmovie';
+    static const showcasestv = '/showcasestv';
+
 }
 
 final router = GoRouter(
@@ -187,7 +189,6 @@ final router = GoRouter(
           pageBuilder: (context, state) {
             try {
               final id = int.parse(state.pathParameters['id']!);
-              final series = state.extra as TvSeries;
               return NoTransitionPage(
                 child: TvSeriesDetailsScreen(tvSeriesId: id),
               );
@@ -261,8 +262,26 @@ final router = GoRouter(
         // //       ),
         GoRoute(
           path: AppRoutes.unifiedSearch,
-          pageBuilder: (context, state) => NoTransitionPage(
+          pageBuilder: (context, state) => const NoTransitionPage(
             child: UnifiedSearchScreen(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.shorts,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: SubscriptionsPage(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.showcasesmovie,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MoviePage(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.showcasestv,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: TvShowPage(),
           ),
         ),
       ],

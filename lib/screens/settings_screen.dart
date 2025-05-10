@@ -65,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    'Columns: ${userDataService.gridSize?.round() ?? 3}',
+                    'Columns: ${userDataService.gridSize.round()}',
                     style: const TextStyle(color: AppColors.secondaryText),
                   ),
                 ),

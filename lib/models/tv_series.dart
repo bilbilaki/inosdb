@@ -1,6 +1,6 @@
 // lib/models/tv_series.dart
 import 'package:flutter/foundation.dart';
-import 'package:miko/models/movie.dart'; // Import VideoInfo if defined there or define here
+import 'package:miko/models/movie.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 import 'season.dart';
 enum LoadingStatus {

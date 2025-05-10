@@ -7,8 +7,6 @@ import 'package:miko/providers/anime_provider.dart'; // Use AnimeProvider
 import 'package:miko/utils/colors.dart';
 import 'package:miko/widgets/anime_series_card.dart'; // Use AnimeSeriesCard
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 import 'package:miko/services/data_manager.dart';
 
 class SearchScreenAnime extends StatefulWidget {

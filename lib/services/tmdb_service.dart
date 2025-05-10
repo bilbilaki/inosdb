@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart'; // For kDebugMode
+import 'package:tmdb_flutter/tmdb_flutter.dart';
 // Import the model
 
 class TmdbApiService {
   final String _apiKey =
       "607e40af5bb66576f6fd7252d5529e24"; // Replace with your actual API ke
   final String _baseUrl = 'https://api.themoviedb.org/3';
+  TmdbApiClient tmdbc = TmdbApiClient();
 
   // Cache for storing results
   final _cache = <String, Map<String, dynamic>>{};
@@ -47,7 +49,7 @@ class TmdbApiService {
     for (var attempt = 1; attempt <= _maxRetries; attempt++) {
       try {
         final searchUri = Uri.parse(
-            '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(nameController)}&page=$page&include_adult=false');
+            '$_baseUrl/search/tv?api_key=$_apiKey&query=${Uri.encodeComponent(nameController)}&page=$page&include_adult=true');
 
         final searchResponse = await http.get(searchUri, headers: {
           'Accept': 'application/json',
@@ -114,4 +116,9 @@ class TmdbApiService {
       print('$type: $message');
     }
   }
+
+  // Future<void> getMovieById(movieId) async {
+  //    final  details = await tmdbc.getMovie(movieId);
+  //    details.entries.first.
+  // }
 }

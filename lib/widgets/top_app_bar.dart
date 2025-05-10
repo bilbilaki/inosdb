@@ -4,21 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:miko/models/lists_model.dart';
 import 'package:miko/providers/movie_provider.dart';
 import 'package:miko/screens/movie_details_screen.dart';
-import 'package:miko/screens/search_screen_anime.dart';
-import 'package:miko/screens/search_screen_tv.dart';
-import 'package:miko/screens/search_screen.dart'; // Navigate to SearchScreen
 import 'package:miko/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:miko/models/tv_series.dart';
 import 'package:miko/providers/tv_series_provider.dart';
 import 'package:miko/screens/tv_series_details_screen.dart';
-import 'package:miko/router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:miko/screens/anime_grid_screen.dart';
-import 'package:miko/models/tv_series_anime.dart';
-import 'package:miko/providers/anime_provider.dart';
-import 'package:miko/models/season_anime.dart';
-import 'package:miko/screens/unisearch_screen.dart';
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onMenuPressed;
   final int selectedIndex;

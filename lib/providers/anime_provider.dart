@@ -63,8 +63,9 @@ class AnimeProvider extends ChangeNotifier {
   }
 
   Future<void> loadAnimeData() async {
-    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded)
+    if (_status == LoadingStatus.loading || _status == LoadingStatus.loaded) {
       return;
+    }
 
     _updateStatus(LoadingStatus.loading);
     _animeseriesMap.clear();

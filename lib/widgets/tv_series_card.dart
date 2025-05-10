@@ -8,8 +8,6 @@ import 'package:miko/utils/colors.dart'; // Assuming AppColors exists
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:miko/services/user_data_service.dart';
 import 'package:provider/provider.dart'; // For accessing UserDataService
-import 'package:miko/router.dart';
-import 'package:go_router/go_router.dart';
 
 class TvSeriesCard extends StatelessWidget {
   final TvSeries series;
@@ -226,7 +224,7 @@ class TvSeriesCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2.0),
                   Text(
-                    'Language: ${series.originalLanguage.toUpperCase() ?? 'N/A'}',
+                    'Language: ${series.originalLanguage.toUpperCase()}',
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 10.0,
