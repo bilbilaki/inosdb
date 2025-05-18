@@ -199,7 +199,6 @@ class TvSeriesProvider extends ChangeNotifier {
             series.tmdbId.toString() == _searchQuery; // Allow searching by TMDB ID
       }).toList();
     }
-    notifyListeners();
   }
 
   TvSeries? getTvSeriesByTmdbId(int tmdbId) {

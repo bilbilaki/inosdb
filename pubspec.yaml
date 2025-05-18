@@ -54,6 +54,8 @@ dependencies:
   iconsax: ^0.0.8
   tmdb_api: ^2.2.3
   tmdb_flutter: ^0.1.0
+  html: ^0.15.6
+  encrypt: ^5.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

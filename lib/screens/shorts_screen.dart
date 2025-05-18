@@ -35,12 +35,12 @@ class SubscriptionsPage extends StatefulWidget {
 
 class _SubscriptionsPageState extends State<SubscriptionsPage> {
   final List<ChannelStory> stories = [
-    ChannelStory(name: 'Vevo', imageUrl: 'https://via.placeholder.com/80/FF0000/FFFFFF?text=Vevo'),
-    ChannelStory(name: 'BeatLove', imageUrl: 'https://via.placeholder.com/80/00FF00/FFFFFF?text=Beat'),
-    ChannelStory(name: 'Stake Music', imageUrl: 'https://via.placeholder.com/80/0000FF/FFFFFF?text=Stake'),
-    ChannelStory(name: 'Big Bang', imageUrl: 'https://via.placeholder.com/80/FFFF00/000000?text=Bang'),
-    ChannelStory(name: 'Kouman', imageUrl: 'https://via.placeholder.com/80/FF00FF/FFFFFF?text=Kou'),
-    ChannelStory(name: 'Gaming', imageUrl: 'https://via.placeholder.com/80/00FFFF/000000?text=Game'),
+    ChannelStory(name: 'Vevo', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/6w8mKcd4p04QaQO0FlGpmhWbSAm.jpg'),
+    ChannelStory(name: 'BeatLove', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/2ZWHz2jNaxWhM3JXr56QR4hPUJl.jpg'),
+    ChannelStory(name: 'Stake Music', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/uzHMp5heVLR68kbbUEXFPsmxYsM.jpg'),
+    ChannelStory(name: 'Big Bang', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/6w8mKcd4p04QaQO0FlGpmhWbSAm.jpg'),
+    ChannelStory(name: 'Kouman', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/2ZWHz2jNaxWhM3JXr56QR4hPUJl.jpg'),
+    ChannelStory(name: 'Gaming', imageUrl: 'https://inosdb.worker-inosuke.workers.dev/w500/uzHMp5heVLR68kbbUEXFPsmxYsM.jpg'),
   ];
 
   final List<VideoPost> posts = [
@@ -49,7 +49,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       title: 'Eminem, 2Pac, Jelly Roll, NF, Halsey, Rihanna, Ed Sheeran, Taylor Swift, Skylar Grey | XL MIX',
       views: '748K views',
       timeAgo: '5 months ago',
-      thumbnail: 'https://via.placeholder.com/320x180/FF0000/FFFFFF?text=XL+MIX',
+      thumbnail: 'https://inosdb.worker-inosuke.workers.dev/w1280/2ZWHz2jNaxWhM3JXr56QR4hPUJl.jpg',
       isShort: false,
       likes: '45K',
     ),
@@ -58,7 +58,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       title: 'Songs and theatre video',
       views: '120K views',
       timeAgo: '3 weeks ago',
-      thumbnail: 'https://via.placeholder.com/320x180/0000FF/FFFFFF?text=Theatre',
+      thumbnail: 'https://inosdb.worker-inosuke.workers.dev/w1280/uzHMp5heVLR68kbbUEXFPsmxYsM.jpg',
       isShort: true,
       likes: '8.2K',
     ),
@@ -67,7 +67,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       title: 'Thankable materials from Seasons +9 (Y\'all 4)',
       views: '2.1M views',
       timeAgo: '6 months ago',
-      thumbnail: 'https://via.placeholder.com/320x180/FFFF00/000000?text=Big+Bang',
+      thumbnail: 'https://inosdb.worker-inosuke.workers.dev/w1280/6w8mKcd4p04QaQO0FlGpmhWbSAm.jpg',
       isShort: false,
       likes: '150K',
     ),
@@ -76,7 +76,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       title: 'Mix - Mikey Cyrus - Slide Away (Official Video)',
       views: 'Updated today',
       timeAgo: '',
-      thumbnail: 'https://via.placeholder.com/320x180/FF00FF/FFFFFF?text=Slide',
+      thumbnail: 'https://inosdb.worker-inosuke.workers.dev/w1280/2ZWHz2jNaxWhM3JXr56QR4hPUJl.jpg',
       isShort: false,
       likes: '12K',
     ),
@@ -85,7 +85,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       title: 'Ilihybiri: a lot are you lucky to have a job!',
       views: '402K views',
       timeAgo: '12 hours ago',
-      thumbnail: 'https://via.placeholder.com/320x180/00FFFF/000000?text=Lucky',
+      thumbnail: 'https://inosdb.worker-inosuke.workers.dev/w1280/uzHMp5heVLR68kbbUEXFPsmxYsM.jpg',
       isShort: true,
       likes: '32K',
     ),
@@ -249,7 +249,7 @@ class VideoPostCard extends StatelessWidget {
               // Channel icon
               const CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+                backgroundImage: AssetImage('assets/backdrop_127532.jpg'),
               ),
               const SizedBox(width: 12),
               // Video info

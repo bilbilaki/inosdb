@@ -108,7 +108,7 @@ class AppShell extends StatelessWidget {
   const AppShell({required this.child, super.key});
 
   // --- Helper function to map current route to BottomNavBar index ---
-  int _calculateSelectedIndex(BuildContext context)  {
+  int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).matchedLocation;
 
     // Define the mapping from route path to bottom nav index.
@@ -121,6 +121,8 @@ class AppShell extends StatelessWidget {
       return 2; // Anime
     } else if (location == AppRoutes.genres) {
       return 3; // Genres
+    } else if (location == AppRoutes.genres) {
+      return 4; // Genres
     }
     // Note: Index 4 is the 'Add/Shorts' button, it doesn't correspond to a shell route path.
     else if (location == AppRoutes.library) {
@@ -131,7 +133,6 @@ class AppShell extends StatelessWidget {
 
   // --- Function to handle navigation triggered by BottomNavBar ---
   void _onItemTapped(int index, BuildContext context) async {
-    const int addButtonIndex = 4; // The index of the 'Add/Shorts' button
 
     switch (index) {
       case 0:
@@ -146,11 +147,11 @@ class AppShell extends StatelessWidget {
       case 3:
         context.go('/genre_list_screen');
         break;
-      case addButtonIndex: // Special case: Push the Shorts screen
-        context.push('/favorites_screen'); // Use context.push to add to stack
+      case 4: // Special case: Push the Shorts screen
+        context.push('/watchlist_screen'); // Use context.push to add to stack
         break;
       case 5:
-        context.go('/library_screen');
+        context.go('/favorites_screen');
         break;
       default:
       // Optional: handle unexpected index
@@ -189,105 +190,107 @@ class AppShell extends StatelessWidget {
                   onTap: (index) => _onItemTapped(index, context),
                 ),
                 floatingActionButton: Align(
-  alignment: Alignment.bottomLeft, // This is the key flip
-  child: FloatingActionButton(
-                  onPressed: () async {
-                    final routerState = GoRouterState.of(context);
-                    final currentPath = routerState.uri.path;
-                    late TvSeriesProvider tvSeriesProvider;
-                    late AnimeProvider animeProvider;
-                    late MovieProvider movieProvider;
-                    tvSeriesProvider =
-                        Provider.of<TvSeriesProvider>(context, listen: false);
-                    animeProvider =
-                        Provider.of<AnimeProvider>(context, listen: false);
-                    movieProvider =
-                        Provider.of<MovieProvider>(context, listen: false);
-                    // Access providers
+                    alignment: Alignment.bottomLeft, // This is the key flip
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        final routerState = GoRouterState.of(context);
+                        final currentPath = routerState.uri.path;
+                        late TvSeriesProvider tvSeriesProvider;
+                        late AnimeProvider animeProvider;
+                        late MovieProvider movieProvider;
+                        tvSeriesProvider = Provider.of<TvSeriesProvider>(
+                            context,
+                            listen: false);
+                        animeProvider =
+                            Provider.of<AnimeProvider>(context, listen: false);
+                        movieProvider =
+                            Provider.of<MovieProvider>(context, listen: false);
+                        // Access providers
 
-                    final random = Random();
-                    // Determine current list and navigate to a random item
-                    if (currentPath == '/' && movieProvider.movies.isNotEmpty) {
-                      final randomIndex =
-                          random.nextInt(movieProvider.movies.length);
-                      final randomMovieId =
-                          movieProvider.movies[randomIndex].id;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MovieDetailsScreen(movieId: randomMovieId)));
-                    } else if (currentPath == '/tv_series_grid_screen' &&
-                        tvSeriesProvider.status.index == 1) {
-                      final randomIndex = random
-                          .nextInt(tvSeriesProvider.seriesForDisplay.length);
-                      final randomSeriesId =
-                          tvSeriesProvider.seriesForDisplay[randomIndex].tmdbId;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TvSeriesDetailsScreen(
-                                  tvSeriesId: randomSeriesId)));
-                    } else if (currentPath == '/anime_grid_screen' &&
-                        animeProvider.isInitialized) {
-                      final randomIndex = random
-                          .nextInt(animeProvider.animeseriesForDisplay.length);
-                      final randomAnimeId = animeProvider
-                          .animeseriesForDisplay[randomIndex].tmdbId;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AnimeDetailsScreen(
-                                  tvSeriesId: randomAnimeId)));
-                    }
+                        final random = Random();
+                        // Determine current list and navigate to a random item
+                        if (currentPath == '/' &&
+                            movieProvider.movies.isNotEmpty) {
+                          final randomIndex =
+                              random.nextInt(movieProvider.movies.length);
+                          final randomMovieId =
+                              movieProvider.movies[randomIndex].id;
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MovieDetailsScreen(
+                                      movieId: randomMovieId)));
+                        } else if (currentPath == '/tv_series_grid_screen' &&
+                            tvSeriesProvider.status.index == 1) {
+                          final randomIndex = random.nextInt(
+                              tvSeriesProvider.seriesForDisplay.length);
+                          final randomSeriesId = tvSeriesProvider
+                              .seriesForDisplay[randomIndex].tmdbId;
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TvSeriesDetailsScreen(
+                                      tvSeriesId: randomSeriesId)));
+                        } else if (currentPath == '/anime_grid_screen' &&
+                            animeProvider.isInitialized) {
+                          final randomIndex = random.nextInt(
+                              animeProvider.animeseriesForDisplay.length);
+                          final randomAnimeId = animeProvider
+                              .animeseriesForDisplay[randomIndex].tmdbId;
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AnimeDetailsScreen(
+                                      tvSeriesId: randomAnimeId)));
+                        }
 
 // ... existing code ...
-                    else {
-                      // Randomly select between movies, TV series, and anime
-                      final randomCategory = random
-                          .nextInt(3); // 0 for movies, 1 for TV, 2 for anime
+                        else {
+                          // Randomly select between movies, TV series, and anime
+                          final randomCategory = random.nextInt(
+                              3); // 0 for movies, 1 for TV, 2 for anime
 
-                      if (randomCategory == 0) {
-                        // Open random movie
-                        final randomIndex =
-                            random.nextInt(movieProvider.movies.length);
-                        final randomMovieId =
-                            movieProvider.movies[randomIndex].id;
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MovieDetailsScreen(
-                                    movieId: randomMovieId)));
-                      } else if (randomCategory == 1) {
-                        // Open random TV series
-                        final randomIndex = random
-                            .nextInt(tvSeriesProvider.seriesForDisplay.length);
-                        final randomSeriesId = tvSeriesProvider
-                            .seriesForDisplay[randomIndex].tmdbId;
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TvSeriesDetailsScreen(
-                                    tvSeriesId: randomSeriesId)));
-                      } else if (randomCategory == 2) {
-                        // Open random anime
-                        final randomIndex = random.nextInt(
-                            animeProvider.animeseriesForDisplay.length);
-                        final randomAnimeId = animeProvider
-                            .animeseriesForDisplay[randomIndex].tmdbId;
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AnimeDetailsScreen(
-                                    tvSeriesId: randomAnimeId)));
-                      }
-                      // If the randomly selected category has no items, nothing happens
-                    }
+                          if (randomCategory == 0) {
+                            // Open random movie
+                            final randomIndex =
+                                random.nextInt(movieProvider.movies.length);
+                            final randomMovieId =
+                                movieProvider.movies[randomIndex].id;
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MovieDetailsScreen(
+                                        movieId: randomMovieId)));
+                          } else if (randomCategory == 1) {
+                            // Open random TV series
+                            final randomIndex = random.nextInt(
+                                tvSeriesProvider.seriesForDisplay.length);
+                            final randomSeriesId = tvSeriesProvider
+                                .seriesForDisplay[randomIndex].tmdbId;
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TvSeriesDetailsScreen(
+                                        tvSeriesId: randomSeriesId)));
+                          } else if (randomCategory == 2) {
+                            // Open random anime
+                            final randomIndex = random.nextInt(
+                                animeProvider.animeseriesForDisplay.length);
+                            final randomAnimeId = animeProvider
+                                .animeseriesForDisplay[randomIndex].tmdbId;
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AnimeDetailsScreen(
+                                        tvSeriesId: randomAnimeId)));
+                          }
+                          // If the randomly selected category has no items, nothing happens
+                        }
 // ... existing code ...
-                  }, // Icon for random selection
-                  tooltip: 'Play Random',
-                  child: const Icon(Icons.shuffle), // Tooltip text
-                  )  ),
+                      }, // Icon for random selection
+                      tooltip: 'Play Random',
+                      child: const Icon(Icons.shuffle), // Tooltip text
+                    )),
               ),
 
               // --- Dark Overlay (No changes needed) ---

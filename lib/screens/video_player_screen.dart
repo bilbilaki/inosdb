@@ -38,16 +38,15 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> {
     super.initState();
     // Move permission check to after widget is fully initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkPermissions();
     });
 
     // Open the video URL.
-    player.open(Media(widget.videoUrl),
+    player.open(Media(Uri.decodeComponent(widget.videoUrl)),
         play: true); // Start playing immediately
 
     // Add error handling
     player.stream.error.listen((error) {
-      print('Player error: $error');
+      debugPrint('Player error: $error');
       // You might want to show a snackbar or dialog here
     });
   }

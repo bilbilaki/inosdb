@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart'; // For kDebugMode
 import 'package:tmdb_flutter/tmdb_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants.dart' as c;
+import '../../showcases/movie_model.dart' as TmdbApiMovieModel;
 
 class VideoInfo {
   final String title;
@@ -72,6 +73,51 @@ class Movie {
     this.rawDownloadLinks,
     this.rawVideos, // Make sure it's included
   });
+ factory Movie.fromTmdbResponseMovie(TmdbApiMovieModel.Movie tmdbMovie) {
+    // Helper to parse DateTime, returning null on failure
+    DateTime? parseTmdbDate(String? dateString) {
+      if (dateString == null || dateString.isEmpty) return null;
+      try {
+        return DateTime.parse(dateString);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return Movie(
+      id: tmdbMovie.id,
+      title: tmdbMovie.title,
+      voteAverage: tmdbMovie.voteAverage,
+      voteCount: tmdbMovie.voteCount,
+      status: tmdbMovie.status ?? 'Unknown', // TMDB details might have status
+      releaseDate: parseTmdbDate(tmdbMovie.releaseDate),
+      revenue: tmdbMovie.revenue ?? 0,
+      runtime: tmdbMovie.runtime,
+      adult: tmdbMovie.adult,
+      backdropPath: tmdbMovie.backdropPath,
+      budget: tmdbMovie.budget ?? 0,
+      homepage: tmdbMovie.homepage,
+      imdbId: tmdbMovie.imdbId,
+      originalLanguage: tmdbMovie.originalLanguage,
+      originalTitle: tmdbMovie.originalTitle,
+      overview: tmdbMovie.overview,
+      popularity: tmdbMovie.popularity,
+      posterPath: tmdbMovie.posterPath,
+      tagline: tmdbMovie.tagline,
+      genres: tmdbMovie.genres?.map((g) => g.name).toList() ?? [], // Convert Genre objects to List<String>
+      productionCompanies: tmdbMovie.productionCompanies?.map((pc) => pc.name).toList() ?? [],
+      productionCountries: tmdbMovie.productionCountries?.map((pc) => pc.name).toList() ?? [],
+      spokenLanguages: tmdbMovie.spokenLanguages?.map((sl) => sl.englishName).toList() ?? [],
+      // Keywords are often fetched separately or part of a different endpoint section in TMDB.
+      // The TMDB Movie model provided doesn't have 'keywords' directly as a List<String>.
+      // If the 'tmdbMovie.keywords' (if it exists in TmdbApiMovieModel.Movie) is a List<KeywordObject>, map names.
+      // For now, defaulting to empty. You might need to fetch keywords separately for recommendations.
+      keywords: [], // Placeholder - TMDB details often have keywords differently structured
+      source: null, // Not available from TMDB general movie response
+      rawDownloadLinks: null, // Not available from TMDB
+      rawVideos: null, // Not available from TMDB
+    );
+  }
 
   String? getPosterUrl() {
     if (posterPath == null || posterPath!.isEmpty || posterPath == "nan") {

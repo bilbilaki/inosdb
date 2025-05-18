@@ -105,15 +105,17 @@ class MovieProvider extends ChangeNotifier {
                 _searchQuery; // Allow searching by year
       }).toList();
     }
-    notifyListeners();
   }
 
   // Function to get a movie by its ID (useful for detail pages)
   Movie? getMovieById(int id) {
     try {
       return _movies.firstWhere((movie) => movie.id == id);
+      
     } catch (e) {
       return null; // Not found
     }
   }
+      notifyListeners();
+
 }

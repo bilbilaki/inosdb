@@ -256,7 +256,6 @@ class AnimeProvider extends ChangeNotifier {
                 _searchQuery; // Allow searching by TMDB ID
       }).toList();
     }
-    notifyListeners();
   }
 
   TvSeriesAnime? getAnimeByTmdbId(int tmdbId) {
