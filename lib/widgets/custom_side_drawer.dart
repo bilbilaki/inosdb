@@ -9,8 +9,12 @@ import 'package:miko/screens/settings_screen.dart';
 import 'package:miko/screens/shorts_screen.dart';
 import 'package:miko/screens/tv_series_grid_screen.dart';
 import 'package:miko/screens/watchlist_screen.dart';
+import 'package:miko/showcases/keyword_search_page.dart';
 import 'package:miko/showcases/movie_page.dart';
+import 'package:miko/showcases/moviesearchpage.dart';
+import 'package:miko/showcases/multi_search_page.dart';
 import 'package:miko/showcases/tv_page.dart';
+import 'package:miko/showcases/tvsearchpage.dart';
 import 'package:miko/utils/colors.dart';
 
 class CustomSideDrawer extends StatelessWidget {
@@ -38,83 +42,67 @@ class CustomSideDrawer extends StatelessWidget {
               ],
             ),
           ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.movie_creation,
-            title: 'Movies',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context, icon: Icons.movie_creation, title: 'Movies',
+              onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => HomeScreen(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.live_tv_rounded,
-            title: 'TV Series',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.live_tv_rounded, title: 'TV Series', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => TvSeriesGridScreen(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.movie_outlined,
-            title: 'Anime',
-            onTap: () {Navigator.push(
+          _buildDrawerItem(context, icon: Icons.movie_outlined, title: 'Anime',
+              onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => AnimeGridScreen(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.category_outlined,
-            title: 'Genres',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.category_outlined, title: 'Genres', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => GenreListScreen(), // Pass movie ID
                 ));
           }),
-          
           const Divider(color: AppColors.dividerColor, height: 1),
-          _buildDrawerItem(
-            context,
-            icon: Icons.video_library_outlined,
-            title: 'Subscription ',
-            onTap: () {Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.video_library_outlined,
+              title: 'Subscription ', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => SubscriptionsPage(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.settings_outlined,
-            title: 'Settings',
-            onTap: () {Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.settings_outlined, title: 'Settings', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => SettingsScreen(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.watch_later_outlined,
-            title: 'Watchlist',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.watch_later_outlined, title: 'Watchlist', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => WatchlistScreen(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.favorite_border_sharp,
-            title: 'Favorites',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.favorite_border_sharp, title: 'Favorites', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => FavoritesScreen(), // Pass movie ID
@@ -157,28 +145,46 @@ class CustomSideDrawer extends StatelessWidget {
                   builder: (_) => MoviePage(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.tv_rounded,
-            title: 'Popular TV Shows',
-            onTap: (){Navigator.push(
+          _buildDrawerItem(context,
+              icon: Icons.tv_rounded, title: 'Popular TV Shows', onTap: () {
+            Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => TvShowPage(), // Pass movie ID
                 ));
           }),
-          _buildDrawerItem(
-            context,
-            icon: Icons.add,
-            title: 'Browse channels',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Browse channels not implemented yet')),
-              );
-              Navigator.pop(context); // Close drawer
-            },
-          ),
+          _buildDrawerItem(context, icon: Icons.add, title: 'Browse channels',
+              onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TvSearchPage(), // Pass movie ID
+                ));
+          }),
+          _buildDrawerItem(context, icon: Icons.question_mark, title: 'Browse channels',
+              onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MovieSearchPage(), // Pass movie ID
+                ));
+          }),
+           _buildDrawerItem(context, icon: Icons.five_k_plus_rounded, title: 'Browse channels',
+              onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => KeywordSearchPage(), // Pass movie ID
+                ));
+          }),
+          _buildDrawerItem(context, icon: Icons.javascript, title: 'Browse channels',
+              onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiSearchPage(), // Pass movie ID
+                ));
+          })
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:miko/showcases/movies_by_keyword_screen.dart';
 import 'movie_model.dart';
 import 'movie_service.dart';
 import 'person_detail_page.dart';
@@ -19,7 +20,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   bool _hasError = false;
   String _errorMessage = '';
   MovieResponse? recommendations;
-  
+  List<Keyword> _movieKeywords = [];
   @override
   void initState() {
     super.initState();
@@ -52,90 +53,89 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     });
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<Map<String, dynamic>>(
         future: _movieDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // Показываем базовую информацию о фильме во время загрузки деталей
             return _buildLoadingView();
-          } else if (snapshot.hasError || _hasError) {
-            return _buildErrorView(context);
+          } else if (snapshot.hasError) {
+            // Используем snapshot.error для сообщения об ошибке
+            return _buildErrorView(context, snapshot.error.toString());
           } else if (snapshot.hasData) {
             final detailedMovie = snapshot.data!['details'] as Movie;
             final credits = snapshot.data!['credits'] as MovieCredits;
             recommendations = snapshot.data!['recommendations'] as MovieResponse;
+
+            // --- ИЗВЛЕКАЕМ КЛЮЧЕВЫЕ СЛОВА ---
+            // --- EXTRACT KEYWORDS ---
+            // Предполагаем, что detailedMovie (объект Movie) теперь содержит поле keywords
+            // Assumes detailedMovie (Movie object) now contains the keywords field
+            _movieKeywords = detailedMovie.keywords;
+
             return _buildDetailView(context, detailedMovie, credits);
           } else {
-            // Fallback to use the basic movie data if detailed data isn't available
-            return _buildDetailView(context, widget.movie, null);
+            // Не должно произойти, если future завершается без данных и без ошибки
+            return _buildErrorView(context, 'No data received.');
           }
         },
       ),
     );
   }
-  
+
   Widget _buildLoadingView() {
     return Stack(
       children: [
-        // Show the basic movie info in the background while loading
         _buildDetailView(context, widget.movie, null, showDetailedInfo: false),
-        
-        // Overlay with loading indicator
         Container(
           color: Colors.black54,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: const Center(child: CircularProgressIndicator()),
         ),
       ],
     );
   }
-  
-  Widget _buildErrorView(BuildContext context) {
+
+  Widget _buildErrorView(BuildContext context, String errorMessage) {
     return Stack(
       children: [
-        // Show the basic movie info in the background
         _buildDetailView(context, widget.movie, null, showDetailedInfo: false),
-        
-        // Error overlay
         Container(
           color: Colors.black87,
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading movie details',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _errorMessage,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isLoading = true;
-                      _hasError = false;
-                    });
-                    _loadMovieData();
-                  },
-                  child: const Text('Try Again'),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error loading movie details',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white)),
+                  const SizedBox(height: 8),
+                  Text(errorMessage,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _loadMovieData(); // Повторная загрузка данных
+                      });
+                    },
+                    child: const Text('Try Again'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ],
     );
   }
+
 
   Widget _buildDetailView(BuildContext context, Movie movie, MovieCredits? credits, {bool showDetailedInfo = true}) {
     return CustomScrollView(
@@ -149,6 +149,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _buildAppBar(BuildContext context, Movie movie) {
+    // ... (ваш существующий _buildAppBar без изменений)
     return SliverAppBar(
       expandedHeight: 250,
       pinned: true,
@@ -182,7 +183,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 );
               },
             ),
-            // Gradient overlay for better text visibility
             const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -202,12 +202,13 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _buildMovieDetails(BuildContext context, Movie movie, MovieCredits? credits, bool showDetailedInfo) {
+    // В этом методе мы добавим вызов _buildKeywordsSection
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tagline if available
+          // ... (все ваши существующие виджеты здесь: Tagline, Poster, Info, Overview, Cast, Crew, etc.)
           if (showDetailedInfo && movie.tagline != null && movie.tagline!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
@@ -224,7 +225,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Poster
               Hero(
                 tag: 'movie-${movie.id}',
                 child: ClipRRect(
@@ -248,7 +248,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Movie info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +287,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         ),
                       ),
                     const SizedBox(height: 8),
-                    if (showDetailedInfo && movie.genres != null)
+                    if (showDetailedInfo && movie.genres!.isNotEmpty)
                       Text(
                         'Genres: ${movie.genresText}',
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -304,7 +303,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             ],
           ),
           
-          // Directors section (if credits available)
           if (showDetailedInfo && credits != null && credits.directors.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
@@ -328,6 +326,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             movie.overview.isEmpty ? 'No overview available.' : movie.overview,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
+
+          // --- ДОБАВЬТЕ ВЫЗОВ СЕКЦИИ КЛЮЧЕВЫХ СЛОВ ЗДЕСЬ ---
+          // --- ADD KEYWORDS SECTION CALL HERE ---
+          if (showDetailedInfo && _movieKeywords.isNotEmpty)
+             _buildKeywordsSection(context, _movieKeywords),
           
           // Cast section
           if (showDetailedInfo && credits != null && credits.cast.isNotEmpty) ...[
@@ -340,10 +343,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 TextButton(
-                  onPressed: () {
-                    // Navigate to full cast page (could be implemented later)
-                    // For now, just scroll to this section
-                  },
+                  onPressed: () {},
                   child: Text(
                     'See all ${credits.cast.length}',
                     style: TextStyle(
@@ -355,7 +355,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 180,
+              height: 180, // Adjusted for better text visibility
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: credits.cast.length,
@@ -365,63 +365,59 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     padding: const EdgeInsets.only(right: 12.0),
                     child: GestureDetector(
                       onTap: () => _navigateToPersonDetail(castMember.id, castMember.name, castMember.profilePath),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Hero(
-                            tag: 'person-${castMember.id}',
-                            child: Material(
-                              elevation: 4,
-                              borderRadius: BorderRadius.circular(8),
-                              child: ClipRRect(
+                      child: SizedBox( // Added SizedBox for defined width
+                        width: 100,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Hero(
+                              tag: 'person-${castMember.id}',
+                              child: Material(
+                                elevation: 4,
                                 borderRadius: BorderRadius.circular(8),
-                                child: SizedBox(
-                                  width: 100,
-                                  height: 100,
-                                  child: Image.network(
-                                    castMember.fullProfilePath,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Colors.grey[800],
-                                        child: const Icon(Icons.person, size: 40),
-                                      );
-                                    },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: SizedBox(
+                                    width: 100,
+                                    height: 100, // Keep image square or defined aspect
+                                    child: Image.network(
+                                      castMember.fullProfilePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[800],
+                                          child: const Icon(Icons.person, size: 40),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: 100,
-                            child: Column(
-                              children: [
-                                Text(
-                                  castMember.name,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  castMember.character,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[400],
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 8),
+                            Text(
+                              castMember.name,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 2),
+                            Text(
+                              castMember.character,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -429,7 +425,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ),
             ),
           ],
-          
+          // ... (остальная часть вашего _buildMovieDetails: Crew, Production, Budget, Recommendations, etc.)
           // Crew section (directors, writers, producers)
           if (showDetailedInfo && credits != null) ...[
             // Directors section
@@ -451,50 +447,46 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       padding: const EdgeInsets.only(right: 12.0),
                       child: GestureDetector(
                         onTap: () => _navigateToPersonDetail(director.id, director.name, director.profilePath),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Material(
-                              elevation: 4,
-                              shape: const CircleBorder(),
-                              clipBehavior: Clip.antiAlias,
-                              child: CircleAvatar(
-                                radius: 40,
-                                backgroundImage: NetworkImage(director.fullProfilePath),
-                                onBackgroundImageError: (_, __) {},
-                                child: director.profilePath == null
-                                    ? const Icon(Icons.person, size: 40)
-                                    : null,
+                        child: SizedBox( // Added SizedBox for defined width
+                          width: 90,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Material(
+                                elevation: 4,
+                                shape: const CircleBorder(),
+                                clipBehavior: Clip.antiAlias,
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage: director.profilePath != null ? NetworkImage(director.fullProfilePath) : null,
+                                  onBackgroundImageError: director.profilePath != null ? (_, __) {} : null,
+                                  child: director.profilePath == null
+                                      ? const Icon(Icons.person, size: 40)
+                                      : null,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              width: 90,
-                              child: Column(
-                                children: [
-                                  Text(
-                                    director.name,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Director',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey[400],
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 8),
+                              Text(
+                                director.name,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              Text(
+                                'Director',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey[400],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -590,7 +582,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 60,
+                height: 80, // Increased height a bit
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: movie.productionCompanies!.length,
@@ -599,25 +591,30 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (company.logoPath != null)
-                            Image.network(
-                              company.fullLogoPath,
+                            SizedBox(
                               height: 40,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  height: 40,
-                                  width: 80,
-                                  color: Colors.grey[800],
-                                  child: Center(
-                                    child: Text(
-                                      company.name,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 10),
+                              width: 80, // Give some width for logo or text
+                              child: Image.network(
+                                company.fullLogoPath,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[800],
+                                    child: Center(
+                                      child: Text(
+                                        company.name,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontSize: 10),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             )
                           else
                             Container(
@@ -629,13 +626,21 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                                   company.name,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 10),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
                                 ),
                               ),
                             ),
                           const SizedBox(height: 4),
-                          Text(
-                            company.name,
-                            style: const TextStyle(fontSize: 10),
+                          SizedBox(
+                            width: 80,
+                            child: Text(
+                              company.name,
+                              style: const TextStyle(fontSize: 10),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
@@ -669,7 +674,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  if (movie.budget != null) ...[
+                  if (movie.budget != null && movie.budget! > 0) ...[
                     Expanded(
                       child: _buildInfoCard(
                         context,
@@ -678,9 +683,10 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         Icons.attach_money,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    if (movie.revenue != null && movie.revenue! > 0)
+                      const SizedBox(width: 16),
                   ],
-                  if (movie.revenue != null)
+                  if (movie.revenue != null && movie.revenue! > 0)
                     Expanded(
                       child: _buildInfoCard(
                         context,
@@ -728,7 +734,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       icon: const Icon(Icons.language),
                       label: const Text('Official Website'),
                       onPressed: () {
-                        // Launch URL (would need url_launcher package)
+                        // TODO: Launch URL (would need url_launcher package)
+                        // import 'package:url_launcher/url_launcher.dart';
+                        // if (await canLaunchUrl(Uri.parse(movie.homepage!))) {
+                        //   await launchUrl(Uri.parse(movie.homepage!));
+                        // }
                       },
                     ),
                   if (movie.imdbId != null)
@@ -736,20 +746,62 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       icon: const Icon(Icons.movie),
                       label: const Text('IMDb'),
                       onPressed: () {
-                        // Launch IMDb URL
+                        // TODO: Launch IMDb URL
+                        // final imdbUrl = 'https://www.imdb.com/title/${movie.imdbId}/';
+                        // if (await canLaunchUrl(Uri.parse(imdbUrl))) {
+                        //   await launchUrl(Uri.parse(imdbUrl));
+                        // }
                       },
                     ),
                 ],
               ),
             ],
           ],
-          
+
           const SizedBox(height: 32),
-          
-          // Recommendations Section
           _buildRecommendationsSection(context),
         ],
       ),
+    );
+  }
+
+  // --- НОВЫЙ МЕТОД ДЛЯ ОТОБРАЖЕНИЯ КЛЮЧЕВЫХ СЛОВ ---
+  // --- NEW METHOD TO BUILD THE KEYWORDS SECTION ---
+  Widget _buildKeywordsSection(BuildContext context, List<Keyword> keywords) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          'Keywords',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8.0, // Горизонтальный отступ
+          runSpacing: 8.0, // Вертикальный отступ
+          children: keywords.map((keyword) {
+            return ActionChip(
+              label: Text(keyword.name),
+              backgroundColor: Colors.grey[800],
+              labelStyle: const TextStyle(color: Colors.white70),
+              onPressed: () {
+                // Переход на экран с фильмами по этому ключевому слову
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MoviesByKeywordScreen(
+                      keywordId: keyword.id,
+                      keywordName: keyword.name,
+                      movieService: _movieService, // Передаем экземпляр сервиса
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
   
@@ -767,6 +819,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
   
   Widget _buildRecommendationsSection(BuildContext context) {
+    // ... (ваш существующий _buildRecommendationsSection без изменений)
     if (recommendations == null || recommendations!.results.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -776,7 +829,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
       children: [
         const SizedBox(height: 24),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 0), // Adjusted padding
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -787,7 +840,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               if (recommendations!.results.length > 10)
                 TextButton(
                   onPressed: () {
-                    // Could navigate to a full recommendations page in the future
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('More recommendations coming soon!'),
@@ -807,9 +859,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 220,
+          height: 230, // Adjusted height for better text visibility
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 0), // Adjusted padding
             scrollDirection: Axis.horizontal,
             itemCount: recommendations!.results.length > 10 
                 ? 10 
@@ -826,8 +878,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
   
   Widget _buildRecommendationCard(BuildContext context, Movie movie) {
+    // ... (ваш существующий _buildRecommendationCard без изменений)
     return GestureDetector(
       onTap: () {
+        // Используем pushReplacement, если хотим заменить текущий детальный экран,
+        // или push, если хотим добавить в стек. Для рекомендаций обычно push.
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -841,78 +896,78 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Poster
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  Image.network(
-                    movie.fullPosterPath,
-                    height: 170,
-                    width: 130,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 170,
-                        width: 130,
-                        color: Colors.grey[800],
-                        child: const Center(
-                          child: Icon(Icons.broken_image, size: 40),
-                        ),
-                      );
-                    },
-                  ),
-                  // Rating badge
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: _getRatingColor(movie.voteAverage),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.star, color: Colors.white, size: 12),
-                          const SizedBox(width: 2),
-                          Text(
-                            movie.voteAverage.toStringAsFixed(1),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+            Hero( // Added Hero to recommendation card poster
+              tag: 'movie-recommendation-${movie.id}', // Unique tag
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
+                  children: [
+                    Image.network(
+                      movie.fullPosterPath,
+                      height: 170,
+                      width: 130,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 170,
+                          width: 130,
+                          color: Colors.grey[800],
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 40),
                           ),
-                        ],
+                        );
+                      },
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getRatingColor(movie.voteAverage),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star, color: Colors.white, size: 12),
+                            const SizedBox(width: 2),
+                            Text(
+                              movie.voteAverage.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            // Title
+            const SizedBox(height: 6),
             Text(
               movie.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13, // Slightly larger
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Year
-            Text(
-              movie.releaseDate,
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey[400],
+            if (movie.releaseDate.isNotEmpty && movie.releaseDate.length >= 4)
+              Text(
+                movie.releaseDate.substring(0,4), // Just year
+                style: TextStyle(
+                  fontSize: 11, // Slightly larger
+                  color: Colors.grey[400],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -920,32 +975,36 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
   
   Color _getRatingColor(double rating) {
-    if (rating >= 8.0) {
-      return Colors.green;
-    } else if (rating >= 6.0) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
+    // ... (ваш существующий _getRatingColor без изменений)
+    if (rating >= 7.5) {
+      return Colors.green.shade700;
+    } else if (rating >= 5.0) {
+      return Colors.orange.shade700;
+    } else if (rating > 0.0) {
+      return Colors.red.shade700;
     }
+    return Colors.grey.shade700; // For 0.0 rating
   }
 
   Widget _buildInfoCard(BuildContext context, String title, String value, IconData icon) {
+    // ... (ваш существующий _buildInfoCard без изменений)
     return Card(
       color: Colors.grey[850],
+      elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0), // Adjusted padding
         child: Column(
           children: [
-            Icon(icon, size: 30),
+            Icon(icon, size: 28, color: Theme.of(context).colorScheme.secondary), // Adjusted size and color
             const SizedBox(height: 8),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70), // Adjusted style
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold), // Adjusted style
             ),
           ],
         ),

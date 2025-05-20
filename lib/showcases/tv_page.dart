@@ -140,12 +140,12 @@ class _TvShowPageState extends State<TvShowPage> {
   Widget _buildTvShowGrid() {
     return GridView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
       ),
       itemCount: _tvShows.length + (_isLoading && _tvShows.isNotEmpty ? 2 : 0),
       itemBuilder: (context, index) {
@@ -165,10 +165,10 @@ class _TvShowPageState extends State<TvShowPage> {
       child: GestureDetector(
         onTap: () => _navigateToTvShowDetail(tvShow),
         child: Card(
-          elevation: 8,
+          elevation: 20,
           shadowColor: Colors.black54,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

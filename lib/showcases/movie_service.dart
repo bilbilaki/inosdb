@@ -187,6 +187,270 @@ class MovieService {
     }
   }
 
+  Future<SeasonDetails> getTvShowSeasonDetails({
+  required int tvShowId,
+  required int seasonNumber,
+  String language = 'en-US',
+}) async {
+  try {
+    final url = Uri.parse('$_baseUrl/tv/$tvShowId/season/$seasonNumber?language=$language');
+    
+    final response = await _client.get(url, headers: _headers);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return SeasonDetails.fromJson(data);
+    } else {
+      throw Exception('Failed to load TV show season details: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching TV show season details: $e');
+  }
+}
+
+
+
+Future<YoutubeVideoForSeries> getTvShowVideos({
+  required int tvShowId,
+  String language = 'en-US',
+}) async {
+  try {
+    final url = Uri.parse('$_baseUrl/tv/$tvShowId/videos?language=$language');
+    
+    final response = await _client.get(url, headers: _headers);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return YoutubeVideoForSeries.fromJson(data);
+    } else {
+      throw Exception('Failed to load TV show videos: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching TV show videos: $e');
+  }
+}
+
+
+Future<EpisodeDetails> getTvShowEpisodeDetails({
+ required int tvShowId,
+ required int seasonNumber,
+ required int episodeNumber,
+ String language = 'en-US',
+}) async {
+ try {
+ final url = Uri.parse(
+ '$_baseUrl/tv/$tvShowId/season/$seasonNumber/episode/$episodeNumber?language=$language'
+ );
+ 
+ final response = await _client.get(url, headers: _headers);
+
+ if (response.statusCode == 200) {
+ final Map<String, dynamic> data = json.decode(response.body);
+ return EpisodeDetails.fromJson(data);
+ } else {
+ throw Exception('Failed to load TV show episode details: ${response.statusCode}');
+ }
+ } catch (e) {
+ throw Exception('Error fetching TV show episode details: $e');
+ }
+}
+
+
+
+
+Future<SearchResponse> searchMovies({
+  required String query,
+  bool includeAdult = true,
+  String language = 'en-US',
+  int page = 1,
+  String? region,
+  int? year,
+}) async {
+  try {
+    // Prepare query parameters
+    final Map<String, dynamic> queryParams = {
+      'query': query,
+      'include_adult': includeAdult.toString(),
+      'language': language,
+      'page': page.toString(),
+    };
+
+    // Add optional parameters if provided
+    if (region != null) queryParams['region'] = region;
+    if (year != null) queryParams['year'] = year.toString();
+
+    // Construct the URL
+    final url = Uri.parse('$_baseUrl/search/movie').replace(
+      queryParameters: queryParams.map((key, value) => MapEntry(key, value.toString())),
+    );
+
+    // Make the API call
+    final response = await _client.get(url, headers: _headers);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return SearchResponse.fromJson(data);
+    } else {
+      throw Exception('Failed to search movies: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error searching movies: $e');
+  }
+}
+
+Future<MultiSearchResponse> multiSearch({
+  required String query,
+  bool includeAdult = false,
+  String language = 'en-US',
+  int page = 1,
+}) async {
+  try {
+    final queryParams = {
+      'query': query,
+      'include_adult': includeAdult.toString(),
+      'language': language,
+      'page': page.toString(),
+    };
+
+    final url = Uri.parse('$_baseUrl/search/multi').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await _client.get(url, headers: _headers);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return MultiSearchResponse.fromJson(data);
+    } else {
+      throw Exception('Failed to perform multi-search: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error performing multi-search: $e');
+  }
+}
+
+
+
+  // Keyword Search Method
+  Future<KeywordSearchResponse> searchKeywords({
+    required String query,
+    int page = 1,
+  }) async {
+    try {
+      final queryParams = {
+        'query': query,
+        'page': page.toString(),
+      };
+
+      final url = Uri.parse('$_baseUrl/search/keyword').replace(
+        queryParameters: queryParams,
+      );
+
+      final response = await _client.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return KeywordSearchResponse.fromJson(data);
+      } else {
+        throw Exception('Failed to search keywords: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error searching keywords: $e');
+    }
+  }
+
+  // Keyword Movies Method
+  Future<KeywordMoviesResponse> getMoviesByKeyword({
+    required int keywordId,
+    bool includeAdult = false,
+    String language = 'en-US',
+    int page = 1,
+  }) async {
+    try {
+      final queryParams = {
+        'include_adult': includeAdult.toString(),
+        'language': language,
+        'page': page.toString(),
+      };
+
+      final url = Uri.parse('$_baseUrl/keyword/$keywordId/movies').replace(
+        queryParameters: queryParams,
+      );
+
+      final response = await _client.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return KeywordMoviesResponse.fromJson(data);
+      } else {
+        throw Exception('Failed to get movies by keyword: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error getting movies by keyword: $e');
+    }
+  }
+
+
+  // TV Search Method
+  Future<TVSearchResponse> searchTV({
+    required String query,
+    bool includeAdult = false,
+    String language = 'en-US',
+    int page = 1,
+  }) async {
+    try {
+      final queryParams = {
+        'query': query,
+        'include_adult': includeAdult.toString(),
+        'language': language,
+        'page': page.toString(),
+      };
+
+      final url = Uri.parse('$_baseUrl/search/tv').replace(
+        queryParameters: queryParams,
+      );
+
+      final response = await _client.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return TVSearchResponse.fromJson(data);
+      } else {
+        throw Exception('Failed to search TV shows: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error searching TV shows: $e');
+    }
+  }
+
+
+  // TV Credits Method
+  Future<TVCredits> getTVCredits({
+    required int tvId,
+    String language = 'en-US',
+  }) async {
+    try {
+      final queryParams = {
+        'language': language,
+      };
+
+      final url = Uri.parse('$_baseUrl/tv/$tvId/credits').replace(
+        queryParameters: queryParams,
+      );
+
+      final response = await _client.get(url, headers: _headers);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return TVCredits.fromJson(data);
+      } else {
+        throw Exception('Failed to get TV credits: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error getting TV credits: $e');
+    }
+  }
+
   void dispose() {
     _client.close();
   }

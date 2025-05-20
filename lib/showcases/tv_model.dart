@@ -393,7 +393,7 @@ class Creator {
   }
 
   String get fullProfilePath => profilePath != null 
-      ? 'https://image.tmdb.org/t/p/w200$profilePath' 
+      ? 'https://image.tmdb.org/t/p/w500$profilePath' 
       : 'https://via.placeholder.com/200x300?text=No+Image';
       
   String get genderText {
@@ -431,7 +431,7 @@ class Network {
   }
 
   String get fullLogoPath => logoPath != null 
-      ? 'https://image.tmdb.org/t/p/w200$logoPath' 
+      ? 'https://image.tmdb.org/t/p/w500$logoPath' 
       : 'https://via.placeholder.com/200x100?text=No+Logo';
 }
 
@@ -475,7 +475,7 @@ class ProductionCompany {
   }
 
   String get fullLogoPath => logoPath != null 
-      ? 'https://image.tmdb.org/t/p/w200$logoPath' 
+      ? 'https://image.tmdb.org/t/p/w500$logoPath' 
       : 'https://via.placeholder.com/200x100?text=No+Logo';
 }
 
@@ -539,5 +539,478 @@ class TvShowResponse {
       totalPages: json['total_pages'] ?? 0,
       totalResults: json['total_results'] ?? 0,
     );
+  }
+}
+
+class SeasonDetails {
+  final String? id;
+  final String? airDate;
+  final List<Episode> episodes;
+
+  SeasonDetails({
+    this.id,
+    this.airDate,
+    required this.episodes,
+  });
+
+  factory SeasonDetails.fromJson(Map<String, dynamic> json) {
+    return SeasonDetails(
+      id: json['_id'],
+      airDate: json['air_date'],
+      episodes: (json['episodes'] as List)
+          .map((episode) => Episode.fromJson(episode))
+          .toList(),
+    );
+  }
+}
+
+// class Episode {
+//   final String airDate;
+//   final int episodeNumber;
+//   final String episodeType;
+//   final int id;
+//   final String name;
+//   final String overview;
+//   final int runtime;
+//   final int seasonNumber;
+//   final int showId;
+//   final String? stillPath;
+//   final double voteAverage;
+//   final int voteCount;
+//   final List<CrewMember> crew;
+//   final List<GuestStar> guestStars;
+
+//   Episode({
+//     required this.airDate,
+//     required this.episodeNumber,
+//     required this.episodeType,
+//     required this.id,
+//     required this.name,
+//     required this.overview,
+//     required this.runtime,
+//     required this.seasonNumber,
+//     required this.showId,
+//     this.stillPath,
+//     required this.voteAverage,
+//     required this.voteCount,
+//     required this.crew,
+//     required this.guestStars,
+//   });
+
+//   factory Episode.fromJson(Map<String, dynamic> json) {
+//     return Episode(
+//       airDate: json['air_date'],
+//       episodeNumber: json['episode_number'],
+//       episodeType: json['episode_type'],
+//       id: json['id'],
+//       name: json['name'],
+//       overview: json['overview'],
+//       runtime: json['runtime'],
+//       seasonNumber: json['season_number'],
+//       showId: json['show_id'],
+//       stillPath: json['still_path'],
+//       voteAverage: json['vote_average'].toDouble(),
+//       voteCount: json['vote_count'],
+//       crew: (json['crew'] as List)
+//           .map((crew) => CrewMember.fromJson(crew))
+//           .toList(),
+//       guestStars: (json['guest_stars'] as List)
+//           .map((star) => GuestStar.fromJson(star))
+//           .toList(),
+//     );
+//   }
+// }
+
+class CrewMember {
+  final String job;
+  final String department;
+  final String creditId;
+  final int id;
+  final String name;
+  final String? profilePath;
+
+  CrewMember({
+    required this.job,
+    required this.department,
+    required this.creditId,
+    required this.id,
+    required this.name,
+    this.profilePath,
+  });
+
+  factory CrewMember.fromJson(Map<String, dynamic> json) {
+    return CrewMember(
+      job: json['job'],
+      department: json['department'],
+      creditId: json['credit_id'],
+      id: json['id'],
+      name: json['name'],
+      profilePath: json['profile_path'],
+    );
+  }
+}
+
+class GuestStar {
+  final String character;
+  final int id;
+  final String name;
+  final String? profilePath;
+
+  GuestStar({
+    required this.character,
+    required this.id,
+    required this.name,
+    this.profilePath,
+  });
+
+  factory GuestStar.fromJson(Map<String, dynamic> json) {
+    return GuestStar(
+      character: json['character'],
+      id: json['id'],
+      name: json['name'],
+      profilePath: json['profile_path'],
+    );
+  }
+}
+
+
+
+
+class YoutubeVideoForSeries {
+  final int id;
+  final List<VideoForSeries> results;
+
+  YoutubeVideoForSeries({required this.id, required this.results});
+
+  factory YoutubeVideoForSeries.fromJson(Map<String, dynamic> json) {
+    return YoutubeVideoForSeries(
+      id: json['id'],
+      results: (json['results'] as List)
+          .map((video) => VideoForSeries.fromJson(video))
+          .toList(),
+    );
+  }
+}
+
+class VideoForSeries {
+  final String? language;
+  final String? country;
+  final String name;
+  final String key;
+  final String publishedAt;
+  final String site;
+  final int size;
+  final String type;
+  final bool official;
+  final String id;
+
+  VideoForSeries({
+    this.language,
+    this.country,
+    required this.name,
+    required this.key,
+    required this.publishedAt,
+    required this.site,
+    required this.size,
+    required this.type,
+    required this.official,
+    required this.id,
+  });
+
+  factory VideoForSeries.fromJson(Map<String, dynamic> json) {
+    return VideoForSeries(
+      language: json['iso_639_1'],
+      country: json['iso_3166_1'],
+      name: json['name'],
+      key: json['key'],
+      publishedAt: json['published_at'],
+      site: json['site'],
+      size: json['size'],
+      type: json['type'],
+      official: json['official'],
+      id: json['id'],
+    );
+  }
+
+  // Helper method to get YouTube URL
+  String get youtubeUrl => 'https://www.youtube.com/watch?v=$key';
+}
+
+
+class EpisodeDetails {
+ final String airDate;
+ final int episodeNumber;
+ final String episodeType;
+ final int id;
+ final String name;
+ final String overview;
+ final int? runtime;
+ final int seasonNumber;
+ final String? stillPath;
+ final double voteAverage;
+ final int voteCount;
+ final List<CrewMember> crew;
+ final List<GuestStar> guestStars;
+
+ EpisodeDetails({
+ required this.airDate,
+ required this.episodeNumber,
+ required this.episodeType,
+ required this.id,
+ required this.name,
+ required this.overview,
+ this.runtime,
+ required this.seasonNumber,
+ this.stillPath,
+ required this.voteAverage,
+ required this.voteCount,
+ required this.crew,
+ required this.guestStars,
+ });
+
+ factory EpisodeDetails.fromJson(Map<String, dynamic> json) {
+ return EpisodeDetails(
+ airDate: json['air_date'],
+ episodeNumber: json['episode_number'],
+ episodeType: json['episode_type'],
+ id: json['id'],
+ name: json['name'],
+ overview: json['overview'],
+ runtime: json['runtime'],
+ seasonNumber: json['season_number'],
+ stillPath: json['still_path'],
+ voteAverage: json['vote_average']?.toDouble() ?? 0.0,
+ voteCount: json['vote_count'] ?? 0,
+ crew: (json['crew'] as List?)
+ ?.map((crewJson) => CrewMember.fromJson(crewJson))
+ .toList() ?? [],
+ guestStars: (json['guest_stars'] as List?)
+ ?.map((guestStarJson) => GuestStar.fromJson(guestStarJson))
+ .toList() ?? [],
+ );
+ }
+}
+
+
+class TVSearchResult {
+  final int id;
+  final String name;
+  final String originalName;
+  final String? overview;
+  final String? backdropPath;
+  final String? posterPath;
+  final List<int> genreIds;
+  final List<String> originCountry;
+  final String originalLanguage;
+  final bool adult;
+  final double popularity;
+  final String? firstAirDate;
+  final double voteAverage;
+  final int voteCount;
+
+  TVSearchResult({
+    required this.id,
+    required this.name,
+    required this.originalName,
+    this.overview,
+    this.backdropPath,
+    this.posterPath,
+    this.genreIds = const [],
+    this.originCountry = const [],
+    required this.originalLanguage,
+    this.adult = false,
+    this.popularity = 0.0,
+    this.firstAirDate,
+    this.voteAverage = 0.0,
+    this.voteCount = 0,
+  });
+
+  factory TVSearchResult.fromJson(Map<String, dynamic> json) {
+    return TVSearchResult(
+      id: json['id'],
+      name: json['name'] ?? '',
+      originalName: json['original_name'] ?? '',
+      overview: json['overview'],
+      backdropPath: json['backdrop_path'],
+      posterPath: json['poster_path'],
+      genreIds: List<int>.from(json['genre_ids'] ?? []),
+      originCountry: List<String>.from(json['origin_country'] ?? []),
+      originalLanguage: json['original_language'] ?? '',
+      adult: json['adult'] ?? false,
+      popularity: json['popularity']?.toDouble() ?? 0.0,
+      firstAirDate: json['first_air_date'],
+      voteAverage: json['vote_average']?.toDouble() ?? 0.0,
+      voteCount: json['vote_count'] ?? 0,
+    );
+  }
+
+  // Convenience methods
+  String get formattedFirstAirDate {
+    if (firstAirDate == null) return 'Unknown';
+    try {
+      final date = DateTime.parse(firstAirDate!);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return firstAirDate!;
+    }
+  }
+
+  String get truncatedOverview {
+    if (overview == null) return 'No overview available';
+    return overview!.length > 200 
+      ? '${overview!.substring(0, 200)}...' 
+      : overview!;
+  }
+}
+
+class TVSearchResponse {
+  final int page;
+  final List<TVSearchResult> results;
+  final int totalPages;
+  final int totalResults;
+
+  TVSearchResponse({
+    required this.page,
+    required this.results,
+    this.totalPages = 0,
+    this.totalResults = 0,
+  });
+
+  factory TVSearchResponse.fromJson(Map<String, dynamic> json) {
+    return TVSearchResponse(
+      page: json['page'] ?? 1,
+      results: (json['results'] as List?)
+          ?.map((tvJson) => TVSearchResult.fromJson(tvJson))
+          .toList() ?? [],
+      totalPages: json['total_pages'] ?? 0,
+      totalResults: json['total_results'] ?? 0,
+    );
+  }
+}
+
+
+class TVCredits {
+  final List<TVCast> cast;
+  final List<TVCrew> crew;
+
+  TVCredits({
+    required this.cast,
+    required this.crew,
+  });
+
+  factory TVCredits.fromJson(Map<String, dynamic> json) {
+    return TVCredits(
+      cast: (json['cast'] as List?)
+          ?.map((castJson) => TVCast.fromJson(castJson))
+          .toList() ?? [],
+      crew: (json['crew'] as List?)
+          ?.map((crewJson) => TVCrew.fromJson(crewJson))
+          .toList() ?? [],
+    );
+  }
+}
+
+class TVCast {
+  final int id;
+  final String name;
+  final String originalName;
+  final String? profilePath;
+  final String character;
+  final int order;
+  final String creditId;
+  final String knownForDepartment;
+  final int gender;
+  final bool adult;
+  final double popularity;
+
+  TVCast({
+    required this.id,
+    required this.name,
+    required this.originalName,
+    this.profilePath,
+    required this.character,
+    required this.order,
+    required this.creditId,
+    required this.knownForDepartment,
+    required this.gender,
+    required this.adult,
+    required this.popularity,
+  });
+
+  factory TVCast.fromJson(Map<String, dynamic> json) {
+    return TVCast(
+      id: json['id'],
+      name: json['name'] ?? '',
+      originalName: json['original_name'] ?? '',
+      profilePath: json['profile_path'],
+      character: json['character'] ?? '',
+      order: json['order'] ?? 0,
+      creditId: json['credit_id'] ?? '',
+      knownForDepartment: json['known_for_department'] ?? '',
+      gender: json['gender'] ?? 0,
+      adult: json['adult'] ?? false,
+      popularity: json['popularity']?.toDouble() ?? 0.0,
+    );
+  }
+
+  String get profileImageUrl {
+    return profilePath != null 
+      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
+      : '';
+  }
+
+  String get genderString {
+    switch (gender) {
+      case 1: return 'Female';
+      case 2: return 'Male';
+      default: return 'Unknown';
+    }
+  }
+}
+
+class TVCrew {
+  final int id;
+  final String name;
+  final String originalName;
+  final String? profilePath;
+  final String department;
+  final String job;
+  final String creditId;
+  final int gender;
+  final bool adult;
+  final double popularity;
+
+  TVCrew({
+    required this.id,
+    required this.name,
+    required this.originalName,
+    this.profilePath,
+    required this.department,
+    required this.job,
+    required this.creditId,
+    required this.gender,
+    required this.adult,
+    required this.popularity,
+  });
+
+  factory TVCrew.fromJson(Map<String, dynamic> json) {
+    return TVCrew(
+      id: json['id'],
+      name: json['name'] ?? '',
+      originalName: json['original_name'] ?? '',
+      profilePath: json['profile_path'],
+      department: json['department'] ?? '',
+      job: json['job'] ?? '',
+      creditId: json['credit_id'] ?? '',
+      gender: json['gender'] ?? 0,
+      adult: json['adult'] ?? false,
+      popularity: json['popularity']?.toDouble() ?? 0.0,
+    );
+  }
+
+  String get profileImageUrl {
+    return profilePath != null 
+      ? 'https://inosdb.worker-inosuke.workers.dev/w500$profilePath'
+      : '';
   }
 }
